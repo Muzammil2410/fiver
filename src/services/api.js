@@ -3,8 +3,8 @@ import { useAuthStore } from '../store/useAuthStore'
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: import.meta.env.REACT_APP_API_BASE || 'http://localhost:3000/api',
-  timeout: 10000,
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  timeout: 30000, // 30 seconds timeout for API calls
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,9 +13,11 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = useAuthStore.getState().token
+    const { token, user } = useAuthStore.getState()
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      // Include user ID in token format: userId:token
+      const tokenWithUserId = user?.id ? `${user.id}:${token}` : token
+      config.headers.Authorization = `Bearer ${tokenWithUserId}`
     }
     return config
   },

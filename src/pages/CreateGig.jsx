@@ -6,9 +6,11 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Textarea from '../components/ui/Textarea'
 import Tag from '../components/ui/Tag'
-import localStorageService from '../utils/localStorage'
+import Select from '../components/ui/Select'
+import * as gigService from '../services/gigs'
 import { useAuthStore } from '../store/useAuthStore'
 import { toast } from '../utils/toast'
+import { cropImageForFace } from '../utils/imageCropper'
 
 export default function CreateGig() {
   const navigate = useNavigate()
@@ -185,10 +187,16 @@ export default function CreateGig() {
         },
       }
       
-      await localStorageService.gigs.create(gigData)
+      // Log payload size before sending
+      const payloadSize = JSON.stringify(gigData).length
+      const payloadSizeMB = payloadSize / (1024 * 1024)
+      console.log(`📤 Sending payload size: ${payloadSizeMB.toFixed(2)} MB`)
+      
+      const response = await gigService.createGig(gigData)
       toast.success('Gig created successfully!')
-      // Redirect to dashboard for freelancers
-      navigate('/dashboard')
+      // Redirect to gigs page to see the created gig
+      // Use replace to avoid back button issues and force a fresh load
+      navigate('/gigs', { replace: true })
     } catch (err) {
       setError(err.message || 'Failed to create gig')
     } finally {
@@ -245,14 +253,40 @@ export default function CreateGig() {
                       return
                     }
                     
-                    // Convert to base64 data URL
+                    // Process image with face detection and cropping
                     const reader = new FileReader()
-                    reader.onloadend = () => {
-                      setFormData({
-                        ...formData,
-                        coverImage: reader.result,
-                      })
-                      setError('')
+                    reader.onloadend = async (event) => {
+                      try {
+                        setError('Processing image and detecting face...')
+                        
+                        // Use face detection and cropping utility
+                        const croppedImage = await cropImageForFace(
+                          event.target.result,
+                          1200, // maxWidth
+                          800,  // maxHeight
+                          0.7    // quality
+                        )
+                        
+                        // Check final size
+                        const sizeInMB = croppedImage.length / (1024 * 1024)
+                        console.log(`📸 Processed image size: ${sizeInMB.toFixed(2)} MB`)
+                        
+                        // Final check - if still too large, show error
+                        if (sizeInMB > 15) {
+                          setError(`Image is still too large (${sizeInMB.toFixed(2)} MB) after processing. Please use a smaller image.`)
+                          return
+                        }
+                        
+                        setFormData({
+                          ...formData,
+                          coverImage: croppedImage,
+                        })
+                        setError('')
+                        toast.success('Image processed successfully! Face is now properly visible.')
+                      } catch (err) {
+                        console.error('Image processing error:', err)
+                        setError('Failed to process image: ' + err.message)
+                      }
                     }
                     reader.onerror = () => {
                       setError('Failed to read image file')
@@ -312,25 +346,25 @@ export default function CreateGig() {
             Note: Package-specific prices and delivery times (configured below) will be used instead of these base values.
           </p>
           
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">
-              Category *
-            </label>
-            <select
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-              required
-            >
-              <option value="">Select category</option>
-              <option value="design">Design</option>
-              <option value="development">Development</option>
-              <option value="writing">Writing</option>
-              <option value="marketing">Marketing</option>
-            </select>
-          </div>
+          <Select
+            label="Category"
+            value={formData.category}
+            onChange={(e) =>
+              setFormData({ ...formData, category: e.target.value })
+            }
+            placeholder="Select category"
+            required
+            options={[
+              { value: '', label: 'Select category' },
+              { value: 'social-media-management', label: 'Social Media Management' },
+              { value: 'video-editing', label: 'Video Editing' },
+              { value: 'logo-designing', label: 'Logo Designing' },
+              { value: 'seo-expert', label: 'SEO Expert' },
+              { value: 'website-development', label: 'Website Development' },
+              { value: 'web-designer', label: 'Web Designer' },
+              { value: 'wordpress-developer', label: 'WordPress Developer' },
+            ]}
+          />
           
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1">

@@ -7,8 +7,22 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Increase body size limit for JSON and URL-encoded data
+app.use(express.json({ limit: '100mb', parameterLimit: 50000 }));
+app.use(express.urlencoded({ extended: true, limit: '100mb', parameterLimit: 50000 }));
+
+// Add middleware to log request size (for debugging)
+app.use((req, res, next) => {
+  if (req.method === 'POST' || req.method === 'PUT') {
+    const contentLength = req.get('content-length');
+    if (contentLength) {
+      const sizeInMB = parseInt(contentLength) / (1024 * 1024);
+      console.log(`📦 Request size: ${sizeInMB.toFixed(2)} MB`);
+    }
+  }
+  next();
+});
 
 // MongoDB Connection
 const mongoURI = process.env.MONGO_URI;
@@ -47,6 +61,11 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// API Routes
+app.use('/api/gigs', require('./routes/gigRoutes'));
+app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/payment-details', require('./routes/paymentDetailRoutes'));
 
 // Server port
 const PORT = process.env.PORT || 5000;

@@ -123,7 +123,29 @@ const setData = (key, data) => {
 // Gigs
 export const gigsService = {
   getAll: (params = {}) => {
+    // Ensure data is initialized
+    try {
+      initializeData()
+    } catch (e) {
+      console.warn('Failed to initialize data:', e)
+    }
+    
     let gigs = getData('gigs')
+    
+    // Ensure we have an array
+    if (!Array.isArray(gigs)) {
+      gigs = []
+    }
+    
+    // Filter by sellerId (for sellers viewing their own gigs)
+    // If sellerId is provided, filter; otherwise show all gigs (for clients)
+    if (params.sellerId) {
+      gigs = gigs.filter((g) => {
+        const sellerId = g.seller?.id || g.sellerId
+        return String(sellerId) === String(params.sellerId)
+      })
+    }
+    // If no sellerId, show all gigs (for clients)
     
     // Filter by search query
     if (params.q) {
@@ -140,17 +162,32 @@ export const gigsService = {
       gigs = gigs.filter((g) => g.category === params.category)
     }
     
-    // Filter by price
+    // Filter by price (use lowest package price if packages exist)
     if (params.minPrice) {
-      gigs = gigs.filter((g) => g.price >= parseInt(params.minPrice))
+      gigs = gigs.filter((g) => {
+        const minPrice = g.packages && g.packages.length > 0
+          ? Math.min(...g.packages.map(p => p.price || 0))
+          : g.price || 0
+        return minPrice >= parseInt(params.minPrice)
+      })
     }
     if (params.maxPrice) {
-      gigs = gigs.filter((g) => g.price <= parseInt(params.maxPrice))
+      gigs = gigs.filter((g) => {
+        const minPrice = g.packages && g.packages.length > 0
+          ? Math.min(...g.packages.map(p => p.price || 0))
+          : g.price || 0
+        return minPrice <= parseInt(params.maxPrice)
+      })
     }
     
     // Filter by delivery time
     if (params.deliveryTime) {
-      gigs = gigs.filter((g) => g.deliveryTime <= parseInt(params.deliveryTime))
+      gigs = gigs.filter((g) => {
+        const deliveryTime = g.packages && g.packages.length > 0
+          ? Math.min(...g.packages.map(p => p.deliveryTime || 0))
+          : g.deliveryTime || 0
+        return deliveryTime <= parseInt(params.deliveryTime)
+      })
     }
     
     // Filter by experience level
@@ -167,27 +204,62 @@ export const gigsService = {
     if (params.sort) {
       switch (params.sort) {
         case 'newest':
-          gigs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          gigs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
           break
         case 'price_asc':
-          gigs.sort((a, b) => a.price - b.price)
+          gigs.sort((a, b) => {
+            const priceA = a.packages && a.packages.length > 0
+              ? Math.min(...a.packages.map(p => p.price || 0))
+              : a.price || 0
+            const priceB = b.packages && b.packages.length > 0
+              ? Math.min(...b.packages.map(p => p.price || 0))
+              : b.price || 0
+            return priceA - priceB
+          })
           break
         case 'price_desc':
-          gigs.sort((a, b) => b.price - a.price)
+          gigs.sort((a, b) => {
+            const priceA = a.packages && a.packages.length > 0
+              ? Math.min(...a.packages.map(p => p.price || 0))
+              : a.price || 0
+            const priceB = b.packages && b.packages.length > 0
+              ? Math.min(...b.packages.map(p => p.price || 0))
+              : b.price || 0
+            return priceB - priceA
+          })
           break
         case 'best':
         default:
           gigs.sort((a, b) => (b.rating || 0) - (a.rating || 0))
           break
       }
+    } else {
+      // Default sort by newest
+      gigs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
     }
     
-    return Promise.resolve({ data: { gigs, hasMore: false } })
+    // Always return consistent structure
+    return Promise.resolve({ 
+      data: { 
+        gigs: Array.isArray(gigs) ? gigs : [], 
+        pagination: {
+          hasMore: false,
+          page: params.page || 1,
+          total: Array.isArray(gigs) ? gigs.length : 0
+        }
+      } 
+    })
   },
   
   getById: (id) => {
     const gigs = getData('gigs')
-    const gig = gigs.find((g) => g.id === id)
+    // Handle both id and _id formats (MongoDB)
+    const gig = gigs.find((g) => 
+      g.id === id || 
+      g._id === id || 
+      String(g.id) === String(id) || 
+      String(g._id) === String(id)
+    )
     return Promise.resolve({ data: gig || null })
   },
   
@@ -285,14 +357,17 @@ export const ordersService = {
       sellerName: gig.seller?.name,
       amount: selectedPackage.price,
       package: orderData.package || 'standard',
-      status: 'Pending payment',
+      status: orderData.paymentScreenshot ? 'Payment pending verify' : 'Pending payment',
       createdAt: new Date().toISOString(),
-      paymentUploadedAt: null,
+      paymentScreenshot: orderData.paymentScreenshot || null,
+      paymentUploadedAt: orderData.paymentScreenshot ? new Date().toISOString() : null,
       paymentVerifiedAt: null,
       workStartedAt: null,
       deliverySubmittedAt: null,
       clientAcceptedAt: null,
       completedAt: null,
+      requirements: orderData.requirements || '',
+      deliveryTime: selectedPackage.deliveryTime || gig.deliveryTime || 0,
     }
     
     orders.push(newOrder)
@@ -302,8 +377,17 @@ export const ordersService = {
   
   update: (id, updateData) => {
     const orders = getData('orders')
-    const index = orders.findIndex((o) => o.id === id)
+    const index = orders.findIndex((o) => o.id === id || o._id === id)
     if (index > -1) {
+      // If status is being updated to 'Payment confirmed', change to 'Active'
+      if (updateData.status === 'Payment confirmed') {
+        updateData.status = 'Active'
+        updateData.workStartedAt = updateData.workStartedAt || new Date().toISOString()
+      }
+      // If status is being updated to 'Completed', set completedAt
+      if (updateData.status === 'Completed') {
+        updateData.completedAt = updateData.completedAt || new Date().toISOString()
+      }
       orders[index] = { ...orders[index], ...updateData }
       setData('orders', orders)
       return Promise.resolve({ data: orders[index] })
@@ -418,7 +502,15 @@ export const projectsService = {
 export const reviewsService = {
   getByGigId: (gigId) => {
     const reviews = getData('reviews')
-    const gigReviews = reviews.filter((r) => r.gigId === gigId)
+    // Handle both id and _id formats, and filter only public reviews
+    const gigReviews = reviews.filter((r) => {
+      const matchesGig = 
+        r.gigId === gigId || 
+        String(r.gigId) === String(gigId) ||
+        (r.gigId && String(r.gigId) === String(gigId))
+      // Only return public reviews or all reviews if isPublic is not set (backward compatibility)
+      return matchesGig && (r.isPublic !== false)
+    })
     
     const averageRating =
       gigReviews.length > 0
@@ -433,13 +525,41 @@ export const reviewsService = {
     })
   },
   
-  create: (orderId, reviewData) => {
+  getByOrderId: (orderId) => {
     const reviews = getData('reviews')
-    const orders = getData('orders')
-    const order = orders.find((o) => o.id === orderId)
-    
+    // Handle both id and _id formats
+    const orderReview = reviews.find((r) => 
+      r.orderId === orderId || 
+      String(r.orderId) === String(orderId)
+    )
+    return Promise.resolve({ data: orderReview || null })
+  },
+  
+  create: async (orderId, reviewData) => {
+    // This method is deprecated - use createWithOrder instead
+    // But keep for backward compatibility
+    return this.createWithOrder(orderId, null, reviewData)
+  },
+  
+  createWithOrder: async (orderId, order, reviewData) => {
+    // If order is not provided, try to get it from localStorage as fallback
     if (!order) {
-      return Promise.reject(new Error('Order not found'))
+      const orders = getData('orders')
+      // Try to find order by both id and _id (handle MongoDB _id format)
+      order = orders.find((o) => {
+        const oId = o.id || o._id
+        const oIdStr = String(oId || '')
+        const orderIdStr = String(orderId || '')
+        return oId === orderId || 
+               oIdStr === orderIdStr ||
+               oIdStr.includes(orderIdStr) ||
+               orderIdStr.includes(oIdStr)
+      })
+    }
+    
+    if (!order || !order.gigId) {
+      console.error('Order not found or missing gigId. OrderId:', orderId, 'Order:', order)
+      return Promise.reject(new Error('Order not found or invalid. Please ensure the order exists and is completed.'))
     }
     
     const currentUser = JSON.parse(localStorage.getItem('auth-storage') || '{}')
@@ -447,7 +567,7 @@ export const reviewsService = {
     
     const newReview = {
       id: Date.now().toString(),
-      orderId,
+      orderId: orderId, // Store the original orderId
       gigId: order.gigId,
       rating: reviewData.rating,
       comment: reviewData.comment || '',
@@ -459,14 +579,28 @@ export const reviewsService = {
       createdAt: new Date().toISOString(),
     }
     
+    const reviews = getData('reviews')
     reviews.push(newReview)
     setData('reviews', reviews)
     
-    // Update gig rating
+    // Update gig rating - handle both id and _id formats
     const gigs = getData('gigs')
-    const gig = gigs.find((g) => g.id === order.gigId)
+    const gig = gigs.find((g) => 
+      g.id === order.gigId || 
+      g._id === order.gigId || 
+      String(g.id) === String(order.gigId) || 
+      String(g._id) === String(order.gigId)
+    )
+    
     if (gig) {
-      const gigReviews = reviews.filter((r) => r.gigId === order.gigId)
+      // Get all reviews for this gig (handle both id formats)
+      const gigReviews = reviews.filter((r) => 
+        r.gigId === order.gigId || 
+        String(r.gigId) === String(order.gigId) ||
+        (gig.id && r.gigId === gig.id) ||
+        (gig._id && r.gigId === gig._id)
+      )
+      
       gig.rating =
         gigReviews.length > 0
           ? gigReviews.reduce((sum, r) => sum + r.rating, 0) / gigReviews.length

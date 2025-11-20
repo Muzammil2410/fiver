@@ -7,7 +7,7 @@ export default function GigCard({ gig }) {
   const navigate = useNavigate()
   
   const handleClick = () => {
-    navigate(`/gigs/${gig.id}`)
+    navigate(`/gigs/${gig._id || gig.id}`)
   }
   
   const handleKeyDown = (e) => {
@@ -56,7 +56,7 @@ export default function GigCard({ gig }) {
       aria-label={`View gig: ${gig.title}`}
     >
       {/* Cover Image - Prominent Background */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
+      <div className="relative aspect-[16/10] overflow-hidden bg-neutral-100 min-h-[280px]">
         {displayImage ? (
           <>
             <img
@@ -96,16 +96,16 @@ export default function GigCard({ gig }) {
       </div>
       
       {/* Content */}
-      <div className="p-4">
+      <div className="p-6">
         {/* Seller Info */}
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-3 mb-4">
           <Avatar
             src={gig.seller?.avatar}
             name={gig.seller?.name}
-            size="sm"
+            size="md"
           />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-neutral-900 truncate">
+            <p className="text-base font-medium text-neutral-900 truncate">
               {gig.seller?.name || 'Seller'}
             </p>
             <div className="flex items-center gap-1 mt-0.5">
@@ -125,7 +125,7 @@ export default function GigCard({ gig }) {
         </div>
         
         {/* Title */}
-        <h3 className="font-semibold text-neutral-900 mb-3 line-clamp-2 min-h-[3rem] text-base leading-snug">
+        <h3 className="font-semibold text-neutral-900 mb-4 line-clamp-2 min-h-[3.5rem] text-lg leading-snug">
           {gig.title}
         </h3>
         
@@ -146,7 +146,7 @@ export default function GigCard({ gig }) {
               <span className="text-xs text-neutral-500">No reviews yet</span>
             )}
           </div>
-          <div className="text-base font-bold text-neutral-900">
+          <div className="text-lg font-bold text-neutral-900">
             {lowestPrice ? (
               <>
                 From <span className="text-primary-600">PKR {lowestPrice.toLocaleString()}</span>

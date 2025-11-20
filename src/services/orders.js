@@ -1,62 +1,92 @@
 import api from './api'
 
 /**
- * Fetch user's orders
- * @param {Object} params - Query parameters
- * @returns {Promise} API response
+ * Order Service - Handles all order-related API calls
  */
-export const getOrders = async (params = {}) => {
-  return api.get('/orders', { params })
-}
 
-/**
- * Fetch single order by ID
- * @param {string|number} id - Order ID
- * @returns {Promise} API response
- */
-export const getOrder = async (id) => {
-  return api.get(`/orders/${id}`)
-}
-
-/**
- * Create a new order
- * @param {Object} orderData - Order data (gigId, package, etc.)
- * @returns {Promise} API response
- */
+// Create a new order
 export const createOrder = async (orderData) => {
-  return api.post('/orders', orderData)
+  try {
+    const response = await api.post('/orders', orderData)
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to create order')
+  }
 }
 
-/**
- * Update order status
- * @param {string|number} id - Order ID
- * @param {Object} updateData - Update data
- * @returns {Promise} API response
- */
-export const updateOrder = async (id, updateData) => {
-  return api.put(`/orders/${id}`, updateData)
+// Get all orders (filtered by user role)
+export const getAllOrders = async (params = {}) => {
+  try {
+    const response = await api.get('/orders', { params })
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch orders')
+  }
 }
 
-/**
- * Get order messages
- * @param {string|number} orderId - Order ID
- * @returns {Promise} API response
- */
-export const getOrderMessages = async (orderId) => {
-  return api.get(`/orders/${orderId}/messages`)
+// Get single order by ID
+export const getOrderById = async (id) => {
+  try {
+    const response = await api.get(`/orders/${id}`)
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch order')
+  }
 }
 
-/**
- * Send message to order
- * @param {string|number} orderId - Order ID
- * @param {FormData} formData - Message data (text, attachments)
- * @returns {Promise} API response
- */
-export const sendOrderMessage = async (orderId, formData) => {
-  return api.post(`/orders/${orderId}/messages`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  })
+// Update order
+export const updateOrder = async (id, orderData) => {
+  try {
+    const response = await api.put(`/orders/${id}`, orderData)
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to update order')
+  }
 }
 
+// Get seller's orders
+export const getSellerOrders = async () => {
+  try {
+    const response = await api.get('/orders/seller')
+    // Normalize response structure
+    if (response.data?.success !== undefined) {
+      return response.data
+    } else if (response.data?.data) {
+      return response.data
+    }
+    return response.data
+  } catch (error) {
+    console.error('Error fetching seller orders:', error)
+    throw new Error(
+      error.response?.data?.message || 
+      error.message || 
+      'Failed to fetch seller orders'
+    )
+  }
+}
+
+// Confirm payment (seller only)
+export const confirmPayment = async (orderId) => {
+  try {
+    const response = await api.put(`/orders/${orderId}`, {
+      status: 'Payment confirmed',
+      paymentVerifiedAt: new Date().toISOString()
+    })
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to confirm payment')
+  }
+}
+
+// Complete order (seller only) - marks order as completed and enables review
+export const completeOrder = async (orderId) => {
+  try {
+    const response = await api.put(`/orders/${orderId}`, {
+      status: 'Completed',
+      completedAt: new Date().toISOString()
+    })
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to complete order')
+  }
+}

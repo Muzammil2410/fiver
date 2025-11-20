@@ -58,15 +58,12 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             {!isAuthenticated ? (
               <>
-                <Link to="/signup?role=freelancer">
+                <Link to="/seller-login">
                   <Button variant="ghost" className="hidden md:inline-flex">
                     Become a Seller
                   </Button>
                 </Link>
-                <Link to="/login">
-                  <Button variant="ghost">Sign in</Button>
-                </Link>
-                <Link to="/signup?role=client">
+                <Link to="/client-login">
                   <Button>Join</Button>
                 </Link>
               </>
@@ -154,7 +151,7 @@ export default function Navbar() {
                             Dashboard
                           </Link>
                           <Link
-                            to="/orders"
+                            to="/seller/orders"
                             className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
                             onClick={() => setUserMenuOpen(false)}
                           >
@@ -170,13 +167,35 @@ export default function Navbar() {
                           <hr className="my-1" />
                         </>
                       )}
-                      <Link
-                        to="/settings"
-                        className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
-                        onClick={() => setUserMenuOpen(false)}
-                      >
-                        Settings
-                      </Link>
+                      {user?.role === 'freelancer' && (
+                        <>
+                          <Link
+                            to="/payment-details"
+                            className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            Payment Details
+                          </Link>
+                        </>
+                      )}
+                      {user?.role !== 'freelancer' && (
+                        <>
+                          <Link
+                            to="/orders"
+                            className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            View Orders
+                          </Link>
+                          <Link
+                            to="/profile-settings"
+                            className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            Profile Settings
+                          </Link>
+                        </>
+                      )}
                       <hr className="my-1" />
                       <button
                         type="button"
@@ -268,25 +287,32 @@ export default function Navbar() {
                     </Link>
                   </>
                 )}
+                {/* Client menu items */}
+                {user?.role === 'client' && (
+                  <Link
+                    to="/profile-settings"
+                    className={`block px-4 py-2 rounded-md ${
+                      isActive('/profile-settings')
+                        ? 'bg-primary-100 text-primary-700'
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Profile Settings
+                  </Link>
+                )}
               </div>
             ) : (
               <div className="space-y-2">
                 <Link
-                  to="/signup?role=freelancer"
+                  to="/seller-login"
                   className="block px-4 py-2 rounded-md text-neutral-700 hover:bg-neutral-100"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Become a Seller
                 </Link>
                 <Link
-                  to="/login"
-                  className="block px-4 py-2 rounded-md text-neutral-700 hover:bg-neutral-100"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Sign in
-                </Link>
-                <Link
-                  to="/signup?role=client"
+                  to="/client-login"
                   className="block px-4 py-2 rounded-md text-neutral-700 hover:bg-neutral-100"
                   onClick={() => setMobileMenuOpen(false)}
                 >

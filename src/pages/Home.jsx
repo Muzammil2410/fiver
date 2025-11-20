@@ -241,7 +241,7 @@ export default function Home() {
                 Browse Services
               </Button>
             </Link>
-            <Link to="/signup">
+            <Link to="/seller-login">
               <Button
                 className="bg-white/10 text-white border-2 border-white hover:bg-white/20 px-8 py-3 text-lg"
               >

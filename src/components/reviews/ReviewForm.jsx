@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Button from '../ui/Button'
 import Textarea from '../ui/Textarea'
-import localStorageService from '../../utils/localStorage'
+import * as reviewService from '../../services/reviews'
 import { toast } from '../../utils/toast'
 
 export default function ReviewForm({ orderId, onSuccess }) {
@@ -15,14 +15,14 @@ export default function ReviewForm({ orderId, onSuccess }) {
     e.preventDefault()
     
     if (rating === 0) {
-      alert('Please select a rating')
+      toast.error('Please select a rating')
       return
     }
     
     setLoading(true)
     
     try {
-      await localStorageService.reviews.create(orderId, {
+      await reviewService.createReview(orderId, {
         rating,
         comment,
         isPublic,
@@ -34,7 +34,7 @@ export default function ReviewForm({ orderId, onSuccess }) {
       setComment('')
     } catch (error) {
       console.error('Error submitting review:', error)
-      toast.error('Failed to submit review')
+      toast.error(error.message || 'Failed to submit review')
     } finally {
       setLoading(false)
     }
