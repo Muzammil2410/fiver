@@ -36,10 +36,13 @@ export default function GigsFilterBar() {
             className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="">All Categories</option>
-            <option value="design">Design</option>
-            <option value="development">Development</option>
-            <option value="writing">Writing</option>
-            <option value="marketing">Marketing</option>
+            <option value="social-media-management">Social Media Management</option>
+            <option value="video-editing">Video Editing</option>
+            <option value="logo-designing">Logo Designing</option>
+            <option value="seo-expert">SEO Expert</option>
+            <option value="website-development">Website Development</option>
+            <option value="web-designer">Web Designer</option>
+            <option value="wordpress-developer">WordPress Developer</option>
           </select>
         </div>
         
@@ -101,6 +104,7 @@ export default function GigsFilterBar() {
             <option value="newest">Newest</option>
             <option value="price_asc">Price: Low to High</option>
             <option value="price_desc">Price: High to Low</option>
+            <option value="rating">Highest Rated</option>
           </select>
         </div>
       </div>
@@ -111,18 +115,22 @@ export default function GigsFilterBar() {
           Experience Level
         </label>
         <div className="flex flex-wrap gap-2">
-          {['Beginner', 'Intermediate', 'Expert'].map((level) => {
-            const isSelected = searchParams.get('level') === level.toLowerCase()
+          {[
+            { value: 'beginner', label: 'Beginner' },
+            { value: 'intermediate', label: 'Intermediate' },
+            { value: 'expert', label: 'Expert' }
+          ].map(({ value, label }) => {
+            const isSelected = searchParams.get('level') === value
             return (
               <button
-                key={level}
+                key={value}
                 type="button"
                 onClick={() => {
                   const newParams = new URLSearchParams(searchParams)
                   if (isSelected) {
                     newParams.delete('level')
                   } else {
-                    newParams.set('level', level.toLowerCase())
+                    newParams.set('level', value)
                   }
                   setSearchParams(newParams)
                 }}
@@ -132,7 +140,7 @@ export default function GigsFilterBar() {
                     : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                 }`}
               >
-                {level}
+                {label}
               </button>
             )
           })}

@@ -126,10 +126,13 @@ gigSchema.pre('save', function(next) {
   next();
 });
 
-// Index for search and filtering
+// Indexes for search and filtering - optimized for performance
 gigSchema.index({ title: 'text', description: 'text', skills: 'text' });
 gigSchema.index({ category: 1, active: 1 });
-gigSchema.index({ sellerId: 1 });
+gigSchema.index({ sellerId: 1, active: 1 }); // Compound index for seller queries
+gigSchema.index({ active: 1, createdAt: -1 }); // For default sorting
+gigSchema.index({ active: 1, price: 1 }); // For price sorting
+gigSchema.index({ active: 1, rating: -1 }); // For rating sorting
 
 module.exports = mongoose.model('Gig', gigSchema);
 

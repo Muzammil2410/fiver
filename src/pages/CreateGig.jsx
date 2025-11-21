@@ -194,9 +194,8 @@ export default function CreateGig() {
       
       const response = await gigService.createGig(gigData)
       toast.success('Gig created successfully!')
-      // Redirect to gigs page to see the created gig
-      // Use replace to avoid back button issues and force a fresh load
-      navigate('/gigs', { replace: true })
+      // Redirect to seller dashboard
+      navigate('/seller')
     } catch (err) {
       setError(err.message || 'Failed to create gig')
     } finally {

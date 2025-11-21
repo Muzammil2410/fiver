@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Textarea from '../../components/ui/Textarea'
 import { useAuthStore } from '../../store/useAuthStore'
+import { useNotificationStore } from '../../store/useNotificationStore'
 import { toast } from '../../utils/toast'
 import * as orderService from '../../services/orders'
 import * as gigService from '../../services/gigs'
@@ -368,8 +369,28 @@ export default function OrderPayment() {
       }
       
       const response = await orderService.createOrder(orderData)
+      
+      // Create notification for seller when order is placed
+      // The notification will be picked up by the real-time polling in Navbar
+      // But we can also create it here for immediate feedback
+      if (response?.data && orderData.sellerId) {
+        const order = response.data.data || response.data
+        const notificationStore = useNotificationStore.getState()
+        notificationStore.addNotification({
+          id: `order-${order._id || order.id || Date.now()}-${Date.now()}`,
+          type: 'order',
+          message: `${orderData.buyerName || user?.name || 'A client'} has placed an order for ${orderData.gigTitle || gig?.title || 'your gig'}`,
+          clientName: orderData.buyerName || user?.name || 'A client',
+          gigTitle: orderData.gigTitle || gig?.title || 'your gig',
+          orderId: order._id || order.id,
+          read: false,
+          createdAt: new Date().toISOString(),
+          redirectTo: '/seller/orders'
+        })
+      }
+      
       toast.success('Order placed successfully!')
-      setCreatedOrder(response.data)
+      setCreatedOrder(response.data?.data || response.data)
       setOrderCreated(true)
     } catch (err) {
       setError(err.message || 'Failed to place order')

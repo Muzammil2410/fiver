@@ -1,4 +1,5 @@
 const Gig = require('../models/Gig');
+const Order = require('../models/Order');
 
 // Create a new gig
 exports.createGig = async (req, res) => {
@@ -121,16 +122,26 @@ exports.getAllGigs = async (req, res) => {
       filter.category = category;
     }
 
-    // Filter by price range
-    if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price.$gte = parseInt(minPrice);
-      if (maxPrice) filter.price.$lte = parseInt(maxPrice);
-    }
+    // Note: Price filtering with packages is handled after fetching
+    // We don't add price filter to the DB query here because we need to check
+    // the minimum package price, not just the base price
 
     // Filter by delivery time
     if (deliveryTime) {
       filter.deliveryTime = { $lte: parseInt(deliveryTime) };
+    }
+    
+    // Filter by seller level (experience level)
+    if (level) {
+      // Map level values to match seller.level field
+      const levelMap = {
+        'beginner': ['Beginner', 'Level 1'],
+        'intermediate': ['Intermediate', 'Level 2'],
+        'expert': ['Expert', 'Top Rated']
+      };
+      
+      const levelValues = levelMap[level.toLowerCase()] || [level];
+      filter['seller.level'] = { $in: levelValues };
     }
 
     // Search query
@@ -162,15 +173,84 @@ exports.getAllGigs = async (req, res) => {
 
     // Pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
+    const limitNum = parseInt(limit);
 
-    // Execute query
-    const gigs = await Gig.find(filter)
+    // Execute query - handle price filtering with packages
+    let query = Gig.find(filter);
+    
+    // If price filtering is needed, fetch more results to account for package-based filtering
+    const fetchLimit = (minPrice || maxPrice) ? limitNum * 5 : limitNum;
+    
+    let gigs = await query
       .sort(sortOption)
       .skip(skip)
-      .limit(parseInt(limit))
+      .limit(fetchLimit)
       .lean();
-
-    // Get total count for pagination
+    
+    // Filter by package prices if minPrice or maxPrice is set
+    // This ensures we check the minimum package price (what users see), not just base price
+    if (minPrice || maxPrice) {
+      const minPriceNum = minPrice ? parseInt(minPrice) : null;
+      const maxPriceNum = maxPrice ? parseInt(maxPrice) : null;
+      
+      gigs = gigs.filter(gig => {
+        // Get the minimum price from packages or use base price
+        let minGigPrice = gig.price || 0;
+        if (gig.packages && gig.packages.length > 0) {
+          const packagePrices = gig.packages.map(p => p.price || 0).filter(p => p > 0);
+          if (packagePrices.length > 0) {
+            minGigPrice = Math.min(...packagePrices);
+          }
+        }
+        
+        // Check if price is in range
+        if (minPriceNum !== null && minGigPrice < minPriceNum) {
+          return false;
+        }
+        if (maxPriceNum !== null && minGigPrice > maxPriceNum) {
+          return false;
+        }
+        return true;
+      });
+      
+      // Limit to requested page size after filtering
+      gigs = gigs.slice(0, limitNum);
+    }
+    
+    // Add order count for each gig
+    // Use Promise.all to count orders for all gigs in parallel
+    const gigsWithOrderCount = await Promise.all(
+      gigs.map(async (gig) => {
+        const gigId = gig._id?.toString() || gig.id?.toString();
+        let orderCount = 0;
+        
+        if (gigId) {
+          // Count orders for this gig - handle both string and ObjectId
+          try {
+            orderCount = await Order.countDocuments({
+              $or: [
+                { gigId: gigId },
+                { gigId: gig._id }
+              ]
+            });
+          } catch (error) {
+            console.error(`Error counting orders for gig ${gigId}:`, error);
+            orderCount = 0;
+          }
+        }
+        
+        return {
+          ...gig,
+          orderCount
+        };
+      })
+    );
+    
+    gigs = gigsWithOrderCount;
+    
+    // Get total count
+    // Note: For accurate count with package price filtering, we'd need aggregation
+    // For now, this is an approximation
     const total = await Gig.countDocuments(filter);
 
     res.json({
@@ -179,9 +259,9 @@ exports.getAllGigs = async (req, res) => {
         gigs,
         pagination: {
           page: parseInt(page),
-          limit: parseInt(limit),
+          limit: limitNum,
           total,
-          pages: Math.ceil(total / parseInt(limit)),
+          pages: Math.ceil(total / limitNum),
           hasMore: skip + gigs.length < total
         }
       }
@@ -211,9 +291,16 @@ exports.getGigById = async (req, res) => {
       });
     }
 
+    // Add order count
+    const gigId = gig._id?.toString() || gig.id?.toString();
+    const orderCount = await Order.countDocuments({ gigId });
+    
     res.json({
       success: true,
-      data: gig
+      data: {
+        ...gig,
+        orderCount
+      }
     });
   } catch (error) {
     console.error('Error fetching gig:', error);

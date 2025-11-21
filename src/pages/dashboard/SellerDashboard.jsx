@@ -6,8 +6,12 @@ import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import localStorageService from '../../utils/localStorage'
 import * as orderService from '../../services/orders'
+import * as reviewService from '../../services/reviews'
+import * as gigService from '../../services/gigs'
+import { useAuthStore } from '../../store/useAuthStore'
 
 export default function SellerDashboard() {
+  const user = useAuthStore((state) => state.user)
   const [stats, setStats] = useState({
     activeOrders: 0,
     completedOrders: 0,
@@ -20,33 +24,76 @@ export default function SellerDashboard() {
   useEffect(() => {
     fetchDashboardData()
     fetchRecentOrders()
+    fetchAverageRating()
     // Real-time polling every 2 seconds
     const interval = setInterval(() => {
       fetchDashboardData()
       fetchRecentOrders()
+      fetchAverageRating()
     }, 2000)
     
     return () => clearInterval(interval)
-  }, [])
+  }, [user?.id])
   
   const fetchDashboardData = async () => {
     try {
       const response = await localStorageService.dashboard.getSeller()
-      setStats(response.data.stats || stats)
+      setStats(prevStats => ({
+        ...response.data.stats || prevStats,
+        // Keep averageRating from real-time fetch
+        averageRating: prevStats.averageRating
+      }))
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
+    }
+  }
+  
+  // Fetch real-time average rating from all reviews for seller's gigs
+  const fetchAverageRating = async () => {
+    try {
+      if (!user?.id) return
+      
+      // Get all seller's gigs
+      const gigsResponse = await gigService.getAllGigs({ sellerId: user.id })
+      const gigs = gigsResponse.data?.gigs || []
+      
+      if (gigs.length === 0) {
+        setStats(prev => ({ ...prev, averageRating: 0 }))
+        return
+      }
+      
+      // Get all reviews for all seller's gigs
+      const allReviews = []
+      for (const gig of gigs) {
+        const gigId = gig._id || gig.id
+        if (gigId) {
+          try {
+            const reviewResponse = await reviewService.getReviewsByGigId(gigId)
+            const reviews = reviewResponse.data?.reviews || []
+            allReviews.push(...reviews)
+          } catch (error) {
+            // Silently continue if review fetch fails for a gig
+          }
+        }
+      }
+      
+      // Calculate average rating from all reviews
+      const averageRating = allReviews.length > 0
+        ? allReviews.reduce((sum, review) => sum + (review.rating || 0), 0) / allReviews.length
+        : 0
+      
+      setStats(prev => ({ ...prev, averageRating }))
+    } catch (error) {
+      // Silently fail - don't break dashboard if rating fetch fails
     }
   }
   
   const fetchRecentOrders = async () => {
     try {
       const response = await orderService.getSellerOrders()
-      // Handle different response structures
-      const orders = response?.data?.orders || response?.orders || response?.data || []
-      // Ensure it's an array
-      const ordersArray = Array.isArray(orders) ? orders : []
+      const orders = response.data.orders || []
       // Get the 5 most recent orders
-      const sortedOrders = ordersArray
+      const sortedOrders = orders
         .sort((a, b) => {
           const dateA = new Date(a.createdAt || 0)
           const dateB = new Date(b.createdAt || 0)
@@ -56,8 +103,6 @@ export default function SellerDashboard() {
       setRecentOrders(sortedOrders)
     } catch (error) {
       console.error('Error fetching recent orders:', error)
-      // Don't show error toast for background updates
-      setRecentOrders([])
     }
   }
   

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useSearchParams, useLocation } from 'react-router-dom'
 import MainLayout from '../layouts/MainLayout'
 import GigsFilterBar from '../components/gigs/GigsFilterBar'
@@ -17,8 +17,12 @@ export default function GigsList() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
+  const [visibleGigs, setVisibleGigs] = useState([])
   const isInitialLoadRef = useRef(true)
   const fetchingRef = useRef(false)
+  const renderBatchRef = useRef(null)
+  const BATCH_SIZE = 12 // Render 12 gigs at a time
+  const BATCH_DELAY = 16 // ~60fps (16ms per frame)
   
   // Refresh when navigating to this page (e.g., after creating a gig)
   useEffect(() => {
@@ -27,14 +31,17 @@ export default function GigsList() {
       return
     }
     
-    // Reset initial load when navigating to this page
-    console.log('🔄 useEffect triggered, resetting and fetching gigs')
+    // Reset initial load when navigating to this page or filters change
     isInitialLoadRef.current = true
     setLoading(true)
     setGigs([]) // Clear previous gigs to show loading state
+    setVisibleGigs([]) // Clear visible gigs for progressive rendering
     
     // Reset fetching flag to allow new fetch
     fetchingRef.current = false
+    
+    // Reset page to 1 when filters change
+    setPage(1)
     
     // Call fetchGigs
     const loadGigs = async () => {
@@ -63,19 +70,19 @@ export default function GigsList() {
   const fetchGigs = async () => {
     // Prevent multiple simultaneous fetches
     if (fetchingRef.current) {
-      console.log('⏸️ Fetch already in progress, skipping...')
+      // console.log('⏸️ Fetch already in progress, skipping...')
       return
     }
     
     fetchingRef.current = true
-    console.log('🔄 Starting fetch, fetchingRef set to true')
+    // console.log('🔄 Starting fetch, fetchingRef set to true')
     
     // Show loading spinner only on initial load
     if (isInitialLoadRef.current) {
       setLoading(true)
     }
     
-    console.log('🔄 Fetching gigs...', { isSeller, userId: user?.id })
+    // console.log('🔄 Fetching gigs...', { isSeller, userId: user?.id })
     
     try {
       let response = null
@@ -86,7 +93,7 @@ export default function GigsList() {
           sellerId: user?.id,
           page,
         }
-        console.log('📤 Fetching seller gigs with params:', params)
+        // console.log('📤 Fetching seller gigs with params:', params)
         response = await gigService.getAllGigs(params)
       } else {
         // For clients: Get all gigs with filters
@@ -95,67 +102,60 @@ export default function GigsList() {
           category: searchParams.get('category'),
           minPrice: searchParams.get('minPrice'),
           maxPrice: searchParams.get('maxPrice'),
-          sort: searchParams.get('sort') || 'newest', // Backend maps 'newest' to 'createdAt'
+          sort: searchParams.get('sort') || 'newest',
           deliveryTime: searchParams.get('deliveryTime'),
+          level: searchParams.get('level'),
           page,
         }
         
-        // Remove undefined params
+        // Remove undefined/empty params
         Object.keys(params).forEach((key) => {
-          if (!params[key]) delete params[key]
+          if (!params[key] || params[key] === '') delete params[key]
         })
         
-        console.log('📤 Fetching all gigs with params:', params)
+        // Map sort values to backend format
+        if (params.sort) {
+          const sortMap = {
+            'best': 'newest',
+            'newest': 'newest',
+            'price_asc': 'price-asc',
+            'price_desc': 'price-desc',
+            'rating': 'rating'
+          }
+          params.sort = sortMap[params.sort] || params.sort
+        }
+        
+        // console.log('📤 Fetching all gigs with params:', params)
         response = await gigService.getAllGigs(params)
       }
       
-      console.log('📥 Raw API response:', response)
-      
-      // Extract gigs from response - handle different response structures
+      // Extract gigs from response - optimized parsing
       let fetchedGigs = []
       
       // Backend returns: { success: true, data: { gigs: [...], pagination: {...} } }
-      // Try multiple paths to extract gigs
-      if (response?.success === true && response?.data?.gigs && Array.isArray(response.data.gigs)) {
+      // Optimized: check most common path first
+      if (response?.data?.gigs && Array.isArray(response.data.gigs)) {
         fetchedGigs = response.data.gigs
-        console.log('✅ Found gigs in response.data.gigs (with success):', fetchedGigs.length)
-      } else if (response?.data?.gigs && Array.isArray(response.data.gigs)) {
-        fetchedGigs = response.data.gigs
-        console.log('✅ Found gigs in response.data.gigs (no success flag):', fetchedGigs.length)
       } else if (response?.data && Array.isArray(response.data) && !response.data.gigs) {
-        // Response.data is directly an array
         fetchedGigs = response.data
-        console.log('✅ Found gigs as direct array in response.data:', fetchedGigs.length)
       } else if (Array.isArray(response)) {
         fetchedGigs = response
-        console.log('✅ Found gigs as direct array:', fetchedGigs.length)
       } else if (response?.gigs && Array.isArray(response.gigs)) {
         fetchedGigs = response.gigs
-        console.log('✅ Found gigs in response.gigs:', fetchedGigs.length)
-      } else {
-        console.warn('⚠️ No gigs found in response. Response structure:', {
-          hasSuccess: !!response?.success,
-          hasData: !!response?.data,
-          hasDataGigs: !!response?.data?.gigs,
-          isDataArray: Array.isArray(response?.data),
-          isResponseArray: Array.isArray(response),
-          responseKeys: response ? Object.keys(response) : 'null',
-          fullResponse: response
-        })
       }
       
-      console.log('✅ Final fetched gigs count:', fetchedGigs.length)
+      // console.log('✅ Final fetched gigs count:', fetchedGigs.length)
       
       // Always update state with fetched data
       if (Array.isArray(fetchedGigs) && fetchedGigs.length > 0) {
-        console.log('✅ Setting gigs state with', fetchedGigs.length, 'gigs')
-        console.log('✅ Sample gig data:', fetchedGigs[0])
-        
         // Set gigs first
         setGigs(fetchedGigs)
         
+        // Progressive rendering - render in batches for better performance
+        setVisibleGigs([]) // Reset visible gigs
+        renderGigsProgressively(fetchedGigs)
+        
         // ALWAYS set loading to false when we have gigs - do it immediately
-        console.log('✅ Setting loading to false (have gigs)')
         setLoading(false)
         isInitialLoadRef.current = false
         
@@ -167,7 +167,7 @@ export default function GigsList() {
         }
       } else if (Array.isArray(fetchedGigs)) {
         // Empty array
-        console.log('⚠️ Fetched empty array of gigs')
+        // console.log('⚠️ Fetched empty array of gigs')
         setGigs([])
         setLoading(false)
         isInitialLoadRef.current = false
@@ -202,10 +202,68 @@ export default function GigsList() {
     }
   }
   
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     setPage((p) => p + 1)
     // In real app, append to existing gigs
-  }
+  }, [])
+  
+  // Progressive rendering function - renders gigs in batches
+  const renderGigsProgressively = useCallback((allGigs) => {
+    // Clear any existing batch render
+    if (renderBatchRef.current) {
+      cancelAnimationFrame(renderBatchRef.current)
+    }
+    
+    // Start with first batch immediately for instant feedback
+    const firstBatch = allGigs.slice(0, BATCH_SIZE)
+    setVisibleGigs(firstBatch)
+    
+    if (allGigs.length <= BATCH_SIZE) {
+      return // All gigs rendered
+    }
+    
+    // Use ref to track current index across renders
+    const currentIndexRef = { current: BATCH_SIZE }
+    
+    const renderBatch = () => {
+      const startIndex = currentIndexRef.current
+      const endIndex = Math.min(startIndex + BATCH_SIZE, allGigs.length)
+      const batch = allGigs.slice(0, endIndex)
+      
+      setVisibleGigs(batch)
+      currentIndexRef.current = endIndex
+      
+      if (endIndex < allGigs.length) {
+        // Schedule next batch
+        renderBatchRef.current = requestAnimationFrame(renderBatch)
+      } else {
+        renderBatchRef.current = null
+      }
+    }
+    
+    // Schedule next batch
+    renderBatchRef.current = requestAnimationFrame(renderBatch)
+  }, [])
+  
+  // Update visible gigs when gigs change
+  useEffect(() => {
+    if (gigs.length > 0) {
+      if (visibleGigs.length === 0 || visibleGigs.length !== gigs.length) {
+        renderGigsProgressively(gigs)
+      }
+    } else {
+      setVisibleGigs([])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gigs.length])
+  
+  // Memoize filtered gigs with valid IDs
+  const validGigs = useMemo(() => {
+    return visibleGigs.filter((gig) => {
+      const gigId = gig._id || gig.id
+      return !!gigId
+    })
+  }, [visibleGigs])
   
   return (
     <MainLayout>
@@ -216,33 +274,32 @@ export default function GigsList() {
       {/* Only show filters for clients, not sellers */}
       {!isSeller && <GigsFilterBar />}
       
-      {/* Debug info - can be removed in production */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* Debug info - commented out for production */}
+      {/* {process.env.NODE_ENV === 'development' && (
         <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
           <div>Debug: Loading={loading.toString()}, Gigs={gigs.length}, isSeller={isSeller.toString()}</div>
           {gigs.length > 0 && (
             <div className="mt-1">Sample: {gigs[0]?.title} (ID: {gigs[0]?._id || gigs[0]?.id})</div>
           )}
         </div>
-      )}
+      )} */}
       
       {/* Show gigs if we have them, regardless of loading state */}
       {gigs.length > 0 ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {gigs.map((gig, index) => {
+            {validGigs.map((gig) => {
               const gigId = gig._id || gig.id
-              if (!gigId) {
-                console.warn('⚠️ Gig missing ID at index', index, ':', gig)
-                return null
-              }
-              if (index < 3) {
-                console.log(`🎨 Rendering gig ${index + 1}/${gigs.length}:`, gigId, gig.title?.substring(0, 50))
-              }
-              return (
-                <GigCard key={gigId} gig={gig} />
-              )
+              return <GigCard key={gigId} gig={gig} />
             })}
+            {/* Show skeletons for remaining gigs that haven't rendered yet */}
+            {visibleGigs.length < gigs.length && (
+              <>
+                {Array.from({ length: Math.min(BATCH_SIZE, gigs.length - visibleGigs.length) }).map((_, i) => (
+                  <Skeleton key={`skeleton-${i}`} variant="rectangular" height="400px" />
+                ))}
+              </>
+            )}
           </div>
           
           {!isSeller && hasMore && (

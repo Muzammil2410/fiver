@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '../layouts/MainLayout'
 import GigCard from '../components/gigs/GigCard'
@@ -14,27 +14,94 @@ export default function SellerDashboard() {
   const navigate = useNavigate()
   const [gigs, setGigs] = useState([])
   const [loading, setLoading] = useState(true)
+  const [visibleGigs, setVisibleGigs] = useState([])
   const [editingGig, setEditingGig] = useState(null)
   const [showEditModal, setShowEditModal] = useState(false)
+  const renderBatchRef = useRef(null)
+  const BATCH_SIZE = 12 // Render 12 gigs at a time
 
   useEffect(() => {
     loadGigs()
   }, [user])
 
+  // Progressive rendering function - renders gigs in batches
+  const renderGigsProgressively = useCallback((allGigs) => {
+    // Clear any existing batch render
+    if (renderBatchRef.current) {
+      cancelAnimationFrame(renderBatchRef.current)
+    }
+    
+    // Start with first batch immediately for instant feedback
+    const firstBatch = allGigs.slice(0, BATCH_SIZE)
+    setVisibleGigs(firstBatch)
+    
+    if (allGigs.length <= BATCH_SIZE) {
+      return // All gigs rendered
+    }
+    
+    // Use ref to track current index across renders
+    const currentIndexRef = { current: BATCH_SIZE }
+    
+    const renderBatch = () => {
+      const startIndex = currentIndexRef.current
+      const endIndex = Math.min(startIndex + BATCH_SIZE, allGigs.length)
+      const batch = allGigs.slice(0, endIndex)
+      
+      setVisibleGigs(batch)
+      currentIndexRef.current = endIndex
+      
+      if (endIndex < allGigs.length) {
+        // Schedule next batch
+        renderBatchRef.current = requestAnimationFrame(renderBatch)
+      } else {
+        renderBatchRef.current = null
+      }
+    }
+    
+    // Schedule next batch
+    renderBatchRef.current = requestAnimationFrame(renderBatch)
+  }, [])
+  
   const loadGigs = async () => {
     setLoading(true)
     try {
       // Get only current seller's gigs from API
       const response = await gigService.getAllGigs({ sellerId: user?.id })
-      setGigs(response.data.gigs || [])
+      const fetchedGigs = response.data.gigs || []
+      setGigs(fetchedGigs)
+      
+      // Progressive rendering
+      setVisibleGigs([])
+      renderGigsProgressively(fetchedGigs)
     } catch (error) {
       console.error('Error loading gigs:', error)
       toast.error(error.message || 'Failed to load gigs')
       setGigs([])
+      setVisibleGigs([])
     } finally {
       setLoading(false)
     }
   }
+  
+  // Update visible gigs when gigs change
+  useEffect(() => {
+    if (gigs.length > 0) {
+      if (visibleGigs.length === 0 || visibleGigs.length !== gigs.length) {
+        renderGigsProgressively(gigs)
+      }
+    } else {
+      setVisibleGigs([])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gigs.length])
+  
+  // Memoize filtered gigs with valid IDs
+  const validGigs = useMemo(() => {
+    return visibleGigs.filter((gig) => {
+      const gigId = gig._id || gig.id
+      return !!gigId
+    })
+  }, [visibleGigs])
 
   const handleEdit = (gig, e) => {
     e?.stopPropagation()
@@ -163,9 +230,18 @@ export default function SellerDashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {gigs.map((gig) => (
-            <SellerGigCard key={gig._id || gig.id} gig={gig} />
-          ))}
+          {validGigs.map((gig) => {
+            const gigId = gig._id || gig.id
+            return <SellerGigCard key={gigId} gig={gig} />
+          })}
+          {/* Show skeletons for remaining gigs that haven't rendered yet */}
+          {visibleGigs.length < gigs.length && (
+            <>
+              {Array.from({ length: Math.min(BATCH_SIZE, gigs.length - visibleGigs.length) }).map((_, i) => (
+                <Skeleton key={`skeleton-${i}`} variant="rectangular" height="400px" />
+              ))}
+            </>
+          )}
         </div>
       )}
 
