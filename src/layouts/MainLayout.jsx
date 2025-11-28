@@ -36,7 +36,7 @@ export default function MainLayout({ children, showSidebar = false, sidebarRight
       <Navbar />
       <main
         ref={mainRef}
-        className="flex-1 container-main pt-6"
+        className="flex-1 container-main pt-4 sm:pt-6 px-4 sm:px-6"
         role="main"
         aria-live="polite"
       >

@@ -123,20 +123,20 @@ export default function SellerDashboard() {
   
   return (
     <MainLayout>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-900 mb-2">Seller Dashboard</h1>
-          <p className="text-neutral-600">Monitor your orders and earnings in real-time</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2">Seller Dashboard</h1>
+          <p className="text-sm sm:text-base text-neutral-600">Monitor your orders and earnings in real-time</p>
         </div>
-        <Link to="/create-gig">
-          <Button className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all">
+        <Link to="/create-gig" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 text-white px-4 sm:px-6 py-2 sm:py-3 shadow-lg hover:shadow-xl transition-all text-sm sm:text-base">
             Create Gig
           </Button>
         </Link>
       </div>
       
       {/* Summary Cards - Beautiful Design */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-xl transition-all duration-300">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wide">
@@ -148,7 +148,7 @@ export default function SellerDashboard() {
               </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold text-blue-900">{stats.activeOrders}</p>
+          <p className="text-3xl sm:text-4xl font-bold text-blue-900">{stats.activeOrders}</p>
           <p className="text-xs text-blue-600 mt-2">Orders in progress</p>
         </Card>
         
@@ -163,7 +163,7 @@ export default function SellerDashboard() {
               </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold text-green-900">{stats.completedOrders}</p>
+          <p className="text-3xl sm:text-4xl font-bold text-green-900">{stats.completedOrders}</p>
           <p className="text-xs text-green-600 mt-2">Successfully delivered</p>
         </Card>
         
@@ -178,7 +178,7 @@ export default function SellerDashboard() {
               </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold text-purple-900">
+          <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-purple-900">
             PKR {stats.earnings.toLocaleString()}
           </p>
           <p className="text-xs text-purple-600 mt-2">This month's revenue</p>
@@ -195,7 +195,7 @@ export default function SellerDashboard() {
               </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold text-orange-900">
+          <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-900">
             PKR {stats.pendingWithdrawals.toLocaleString()}
           </p>
           <p className="text-xs text-orange-600 mt-2">Awaiting withdrawal</p>
@@ -212,7 +212,7 @@ export default function SellerDashboard() {
               </svg>
             </div>
           </div>
-          <p className="text-4xl font-bold text-yellow-900">
+          <p className="text-3xl sm:text-4xl font-bold text-yellow-900">
             {stats.averageRating.toFixed(1)}
           </p>
           <p className="text-xs text-yellow-600 mt-2">Out of 5.0 stars</p>
@@ -221,14 +221,14 @@ export default function SellerDashboard() {
       
       {/* Recent Orders - Beautiful Design */}
       <Card className="mb-6 shadow-lg border-2 border-neutral-100">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-neutral-900">Recent Orders</h2>
-            <p className="text-sm text-neutral-600 mt-1">Latest orders from your clients</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-neutral-900">Recent Orders</h2>
+            <p className="text-xs sm:text-sm text-neutral-600 mt-1">Latest orders from your clients</p>
           </div>
           <Link 
             to="/seller/orders" 
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm sm:text-base font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
           >
             View All
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -254,32 +254,32 @@ export default function SellerDashboard() {
                 <Link
                   key={orderId}
                   to={`/orders/${orderId}`}
-                  className="flex items-center justify-between p-5 bg-gradient-to-r from-white via-neutral-50 to-white rounded-xl border-2 border-neutral-200 hover:border-primary-400 hover:shadow-lg transition-all duration-300 group"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 sm:p-5 bg-gradient-to-r from-white via-neutral-50 to-white rounded-xl border-2 border-neutral-200 hover:border-primary-400 hover:shadow-lg transition-all duration-300 group"
                 >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-3 sm:gap-4 flex-1 w-full sm:w-auto">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                       </svg>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <p className="font-bold text-lg text-neutral-900 group-hover:text-primary-600 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-1">
+                        <p className="font-bold text-base sm:text-lg text-neutral-900 group-hover:text-primary-600 transition-colors truncate">
                           {order.gigTitle || `Order #${orderId?.slice(-6)}`}
                         </p>
-                        <Badge variant={getStatusBadge(order.status)} size="sm">
+                        <Badge variant={getStatusBadge(order.status)} size="sm" className="self-start sm:self-center">
                           {order.status}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-neutral-600">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-neutral-600">
                         <span className="flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
                           {order.buyerName || 'Client'}
                         </span>
                         <span className="flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                           {new Date(order.createdAt).toLocaleDateString('en-US', {
@@ -291,8 +291,8 @@ export default function SellerDashboard() {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-2xl text-primary-600 mb-1">PKR {order.amount?.toLocaleString() || '0'}</p>
+                  <div className="text-left sm:text-right w-full sm:w-auto border-t sm:border-t-0 pt-4 sm:pt-0">
+                    <p className="font-bold text-xl sm:text-2xl text-primary-600 mb-1">PKR {order.amount?.toLocaleString() || '0'}</p>
                     <p className="text-xs text-neutral-500">Package: {order.package || 'Standard'}</p>
                   </div>
                 </Link>
@@ -303,7 +303,7 @@ export default function SellerDashboard() {
       </Card>
       
       {/* Shortcuts - Beautiful Design */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Link to="/gigs" className="group">
           <Card className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-indigo-100 to-purple-50 border-2 border-indigo-200 hover:border-indigo-400 hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
             <div className="p-6">

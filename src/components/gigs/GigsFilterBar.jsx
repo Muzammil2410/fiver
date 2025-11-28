@@ -23,8 +23,8 @@ export default function GigsFilterBar() {
   }
   
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
         {/* Category */}
         <div>
           <label className="block text-sm font-medium text-neutral-700 mb-1">

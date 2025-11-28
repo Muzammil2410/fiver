@@ -5,6 +5,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Card from '../components/ui/Card'
 import { toast } from '../utils/toast'
+import * as authService from '../services/auth'
 
 export default function SellerSignup() {
   const navigate = useNavigate()
@@ -52,46 +53,29 @@ export default function SellerSignup() {
     setLoading(true)
     
     try {
-      // Signup: Store user in localStorage
-      const users = JSON.parse(localStorage.getItem('users') || '[]')
-      
-      // Check if user already exists
-      const existingUser = users.find(
-        (u) => u.email === formData.email || u.phone === formData.phone
-      )
-      
-      if (existingUser) {
-        setErrors({
-          submit: 'An account with this email or phone already exists.',
-        })
-        setLoading(false)
-        return
-      }
-      
-      // Create new seller user
-      const newUser = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email || null,
-        phone: formData.phone || null,
+      // Call backend API for registration
+      const response = await authService.register({
+        name: formData.name.trim(),
+        email: formData.email.trim() || undefined,
+        phone: formData.phone.trim() || undefined,
         password: formData.password,
-        otpEnabled: formData.otpEnabled,
         role: 'freelancer', // Seller role
-        username: null,
-        createdAt: new Date().toISOString(),
-        avatar: null,
+        otpEnabled: formData.otpEnabled
+      })
+      
+      if (response.success) {
+        toast.success('Seller account created successfully! Please login to continue.')
+        // Redirect to seller login page
+        navigate('/seller-login')
+      } else {
+        setErrors({
+          submit: response.message || 'An error occurred. Please try again.',
+        })
       }
-      
-      // Save to localStorage
-      users.push(newUser)
-      localStorage.setItem('users', JSON.stringify(users))
-      
-      toast.success('Seller account created successfully! Please login to continue.')
-      // Redirect to seller login page
-      navigate('/seller-login')
     } catch (error) {
+      const errorMessage = error.response?.data?.message || 'An error occurred. Please try again.'
       setErrors({
-        submit: 'An error occurred. Please try again.',
+        submit: errorMessage,
       })
     } finally {
       setLoading(false)
@@ -100,13 +84,13 @@ export default function SellerSignup() {
   
   return (
     <MainLayout>
-      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-8 px-4">
+      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-6 sm:py-8 px-4">
         <Card className="w-full max-w-lg mx-auto shadow-xl">
-          <div className="p-8 md:p-10">
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
+          <div className="p-6 sm:p-8 md:p-10">
+            <div className="text-center mb-6 sm:mb-8">
+              <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 rounded-full mb-3 sm:mb-4">
                 <svg
-                  className="w-8 h-8 text-primary-600"
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -119,11 +103,11 @@ export default function SellerSignup() {
                   />
                 </svg>
               </div>
-              <h1 className="text-4xl font-bold mb-3 text-neutral-900">Become a Seller</h1>
-              <p className="text-lg text-neutral-600">Create your seller account and start selling</p>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3 text-neutral-900">Become a Seller</h1>
+              <p className="text-sm sm:text-base md:text-lg text-neutral-600">Create your seller account and start selling</p>
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               <Input
                 label="Full Name"
                 name="name"

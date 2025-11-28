@@ -102,7 +102,9 @@ export default function AuthForm({ mode = 'login', userRole = 'client' }) {
         
         toast.success('Account created successfully! Please login to continue.')
         // Redirect to login page after signup (don't auto-login)
-        navigate('/login')
+        // Redirect based on user role
+        const redirectTo = userRole === 'freelancer' ? '/seller-login' : '/client-login'
+        navigate(redirectTo)
       } else {
         // Login: Check localStorage for user
         const users = JSON.parse(localStorage.getItem('users') || '[]')
@@ -272,7 +274,7 @@ export default function AuthForm({ mode = 'login', userRole = 'client' }) {
           {mode === 'signup' ? (
             <p>
               Already have an account?{' '}
-              <a href="/login" className="text-primary-600 hover:underline">
+              <a href="/client-login" className="text-primary-600 hover:underline">
                 Login
               </a>
             </p>

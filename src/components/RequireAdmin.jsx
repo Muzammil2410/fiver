@@ -6,7 +6,8 @@ export default function RequireAdmin({ children }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    // Redirect to client login for admin access
+    return <Navigate to="/client-login" replace />
   }
   
   if (user?.role !== 'admin') {

@@ -13,11 +13,10 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const { token, user } = useAuthStore.getState()
+    const { token } = useAuthStore.getState()
     if (token) {
-      // Include user ID in token format: userId:token
-      const tokenWithUserId = user?.id ? `${user.id}:${token}` : token
-      config.headers.Authorization = `Bearer ${tokenWithUserId}`
+      // Use JWT token directly
+      config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
@@ -31,9 +30,21 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      // Get user role before clearing auth state
+      const { user } = useAuthStore.getState()
+      const userRole = user?.role
+      
       // Clear auth state on 401
       useAuthStore.getState().logout()
-      window.location.href = '/login'
+      
+      // Redirect based on user role
+      if (userRole === 'client') {
+        window.location.href = '/client-login'
+      } else if (userRole === 'freelancer') {
+        window.location.href = '/seller-login'
+      } else {
+        window.location.href = '/client-login'
+      }
     }
     return Promise.reject(error)
   }

@@ -58,7 +58,8 @@ function AppContent() {
       user &&
       user.role === 'freelancer' &&
       !user.username &&
-      location.pathname !== '/login' &&
+      location.pathname !== '/client-login' &&
+      location.pathname !== '/seller-login' &&
       location.pathname !== '/signup'
     ) {
       setShowUsernameModal(true)
@@ -74,7 +75,6 @@ function AppContent() {
       <Routes>
           <Route path="/" element={<Home />} />
           {/* Legacy routes - keep for backward compatibility */}
-          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           
           {/* Separate Seller and Client Login/Signup */}

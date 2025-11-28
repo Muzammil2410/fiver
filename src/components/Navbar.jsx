@@ -23,9 +23,18 @@ export default function Navbar() {
   const markAsRead = useNotificationStore((state) => state.markAsRead)
   
   const handleLogout = () => {
+    const userRole = user?.role
     logout()
-    navigate('/')
     setUserMenuOpen(false)
+    
+    // Redirect based on user role
+    if (userRole === 'client') {
+      navigate('/client-login')
+    } else if (userRole === 'freelancer') {
+      navigate('/seller-login')
+    } else {
+      navigate('/')
+    }
   }
   
   const isActive = (path) => location.pathname === path
@@ -132,12 +141,12 @@ export default function Navbar() {
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="max-w-[1200px] mx-auto px-4">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2" aria-label="Home">
             <svg
-              className="w-8 h-8 text-primary-600"
+              className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -149,14 +158,14 @@ export default function Navbar() {
                 d="M13 10V3L4 14h7v7l9-11h-7z"
               />
             </svg>
-            <span className="text-xl font-display font-bold text-primary-600">
+            <span className="text-lg sm:text-xl font-display font-bold text-primary-600">
               BrandName
               <span className="text-primary-500">.</span>
             </span>
           </Link>
           
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {!isAuthenticated ? (
               <>
                 <Link to="/seller-login">
@@ -201,7 +210,7 @@ export default function Navbar() {
                       
                       {/* Notification Dropdown */}
                       {notificationMenuOpen && (
-                        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-neutral-200 z-50 max-h-96 overflow-hidden flex flex-col">
+                        <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-lg shadow-xl border border-neutral-200 z-50 max-h-96 overflow-hidden flex flex-col">
                           <div className="p-4 border-b border-neutral-200 flex items-center justify-between">
                             <h3 className="font-semibold text-neutral-900">Notifications</h3>
                             {unreadCount > 0 && (
@@ -285,7 +294,7 @@ export default function Navbar() {
                   </button>
                   
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                    <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white rounded-md shadow-lg py-1 z-50">
                       {/* Only show seller menu items for freelancers */}
                       {user?.role === 'freelancer' && (
                         <>

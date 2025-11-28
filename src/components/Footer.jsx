@@ -8,8 +8,8 @@ export default function Footer() {
       className="bg-neutral-900 text-neutral-300 mt-auto"
       role="contentinfo"
     >
-      <div className="container-main max-w-[1200px] mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="container-main max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* About */}
           <div>
             <h3 className="text-white font-semibold mb-4">About</h3>
@@ -121,7 +121,7 @@ export default function Footer() {
           </div>
         </div>
         
-        <div className="mt-8 pt-8 border-t border-neutral-800 text-center text-sm">
+        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-neutral-800 text-center text-xs sm:text-sm">
           <p>© {currentYear} BrandName — Built for freelance marketplace</p>
         </div>
       </div>

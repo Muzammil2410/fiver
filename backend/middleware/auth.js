@@ -1,6 +1,6 @@
-// Simple authentication middleware
-// In production, you should use JWT tokens properly
+const jwt = require('jsonwebtoken');
 
+// JWT Authentication Middleware
 const authMiddleware = (req, res, next) => {
   // Get token from header
   const authHeader = req.headers.authorization;
@@ -14,8 +14,6 @@ const authMiddleware = (req, res, next) => {
   
   const token = authHeader.split(' ')[1];
   
-  // For now, we'll just check if token exists
-  // In production, verify JWT token here
   if (!token) {
     return res.status(401).json({
       success: false,
@@ -23,16 +21,33 @@ const authMiddleware = (req, res, next) => {
     });
   }
   
-  // Attach token to request for use in controllers
-  req.token = token;
-  // For now, we'll extract user ID from token if it's in format "userId:actualToken"
-  // In production, decode JWT to get user info
-  if (token.includes(':')) {
-    const [userId] = token.split(':');
-    req.userId = userId;
+  try {
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Attach user ID to request
+    req.userId = decoded.userId;
+    req.token = token;
+    
+    next();
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Token has expired. Please login again.'
+      });
+    } else if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token. Authorization required.'
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: 'Server error during token verification.'
+      });
+    }
   }
-  
-  next();
 };
 
 // Optional middleware - doesn't require auth but adds user info if available
@@ -41,10 +56,17 @@ const optionalAuth = (req, res, next) => {
   
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
-    req.token = token;
-    if (token && token.includes(':')) {
-      const [userId] = token.split(':');
-      req.userId = userId;
+    
+    if (token) {
+      try {
+        // Verify JWT token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.userId = decoded.userId;
+        req.token = token;
+      } catch (error) {
+        // Silently fail for optional auth - just don't set userId
+        // Token might be expired or invalid, but that's okay for optional auth
+      }
     }
   }
   

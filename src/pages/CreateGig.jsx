@@ -206,9 +206,9 @@ export default function CreateGig() {
   return (
     <MainLayout>
       <Card className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Create Gig</h1>
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Create Gig</h1>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <Input
             label="Title *"
             value={formData.title}
@@ -320,7 +320,7 @@ export default function CreateGig() {
           </div>
           
           {/* Base price/delivery - optional, used as fallback if packages not fully configured */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Base Price (PKR) - Optional"
               type="number"
@@ -369,7 +369,7 @@ export default function CreateGig() {
             <label className="block text-sm font-medium text-neutral-700 mb-1">
               Skills
             </label>
-            <div className="flex gap-2 mb-2">
+            <div className="flex flex-col sm:flex-row gap-2 mb-2">
               <Input
                 value={skillInput}
                 onChange={(e) => setSkillInput(e.target.value)}
@@ -380,8 +380,9 @@ export default function CreateGig() {
                   }
                 }}
                 placeholder="Add skill and press Enter"
+                className="flex-1"
               />
-              <Button type="button" onClick={handleAddSkill}>
+              <Button type="button" onClick={handleAddSkill} className="w-full sm:w-auto">
                 Add
               </Button>
             </div>
@@ -395,19 +396,19 @@ export default function CreateGig() {
           </div>
           
           {/* Packages Section */}
-          <div className="border-t pt-6">
-            <h2 className="text-xl font-semibold mb-4">Package Configuration</h2>
-            <p className="text-sm text-neutral-600 mb-4">
+          <div className="border-t pt-4 sm:pt-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Package Configuration</h2>
+            <p className="text-xs sm:text-sm text-neutral-600 mb-4">
               Configure your three packages (Basic, Standard, Premium). All fields are required for each package.
             </p>
             
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {formData.packages.map((pkg, index) => (
-                <Card key={index} className="p-4 bg-neutral-50">
-                  <h3 className="text-lg font-semibold mb-4 text-primary-600">
+                <Card key={index} className="p-3 sm:p-4 bg-neutral-50">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-primary-600">
                     {pkg.name} Package
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <Input
                       label="Price (PKR) *"
                       type="number"
@@ -438,7 +439,7 @@ export default function CreateGig() {
                       placeholder="e.g., 2"
                       required
                     />
-                    <div className="md:col-span-2">
+                    <div className="sm:col-span-2">
                       <Textarea
                         label="Description *"
                         value={pkg.description}
@@ -457,33 +458,35 @@ export default function CreateGig() {
           </div>
           
           {/* Requirements Section */}
-          <div className="border-t pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Requirements</h2>
+          <div className="border-t pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
+              <h2 className="text-lg sm:text-xl font-semibold">Requirements</h2>
               <Button
                 type="button"
                 variant="secondary"
                 onClick={addRequirement}
+                className="w-full sm:w-auto"
               >
                 Add Requirement
               </Button>
             </div>
-            <p className="text-sm text-neutral-600 mb-4">
+            <p className="text-xs sm:text-sm text-neutral-600 mb-4">
               List what information you need from the client to complete this gig.
             </p>
             <div className="space-y-2">
               {formData.requirements.map((req, index) => (
-                <div key={index} className="flex gap-2">
+                <div key={index} className="flex flex-col sm:flex-row gap-2">
                   <Input
                     value={req}
                     onChange={(e) => handleRequirementChange(index, e.target.value)}
                     placeholder="Enter requirement (e.g., Brand name, Industry)"
+                    className="flex-1"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => removeRequirement(index)}
-                    className="text-danger-600"
+                    className="text-danger-600 w-full sm:w-auto"
                   >
                     Remove
                   </Button>
@@ -503,14 +506,15 @@ export default function CreateGig() {
             </div>
           )}
           
-          <div className="flex gap-2">
-            <Button type="submit" loading={loading}>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+            <Button type="submit" loading={loading} className="w-full sm:w-auto">
               Create Gig
             </Button>
             <Button
               type="button"
               variant="secondary"
               onClick={() => navigate('/gigs')}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
