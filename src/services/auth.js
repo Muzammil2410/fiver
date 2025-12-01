@@ -35,3 +35,9 @@ export const checkUsernameAvailability = async (username) => {
   return response.data
 }
 
+// Change password
+export const changePassword = async (passwordData) => {
+  const response = await api.put('/auth/change-password', passwordData)
+  return response.data
+}
+

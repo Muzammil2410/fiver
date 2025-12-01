@@ -5,6 +5,7 @@ import Card from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
 import ReviewForm from '../../components/reviews/ReviewForm'
+import ChatWindow from '../../components/chat/ChatWindow'
 import * as orderService from '../../services/orders'
 import { useAuthStore } from '../../store/useAuthStore'
 import { toast } from '../../utils/toast'
@@ -302,6 +303,17 @@ export default function OrderDetail() {
                   </div>
                 </div>
               </div>
+            </Card>
+          )}
+
+          {/* Chat Window - Available for both buyer and seller */}
+          {order && (order.status !== 'Cancelled') && (
+            <Card>
+              <h2 className="text-xl font-semibold mb-4">Order Chat</h2>
+              <p className="text-sm text-neutral-600 mb-4">
+                Communicate with {isSeller ? 'the buyer' : 'the seller'} about this order
+              </p>
+              <ChatWindow orderId={order._id || order.id} />
             </Card>
           )}
         </div>

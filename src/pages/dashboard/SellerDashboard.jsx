@@ -35,11 +35,55 @@ export default function SellerDashboard() {
     return () => clearInterval(interval)
   }, [user?.id])
   
+  // Calculate real-time stats from orders
+  const calculateStatsFromOrders = (orders) => {
+    const activeStatuses = ['Active', 'In progress', 'Delivered', 'Payment confirmed']
+    
+    const activeOrders = orders.filter(order => 
+      activeStatuses.includes(order.status)
+    ).length
+    
+    const completedOrders = orders.filter(order => 
+      order.status === 'Completed'
+    ).length
+    
+    // Calculate earnings from completed orders this month
+    const currentMonth = new Date().getMonth()
+    const currentYear = new Date().getFullYear()
+    const monthlyEarnings = orders
+      .filter(order => {
+        if (order.status !== 'Completed') return false
+        const orderDate = new Date(order.completedAt || order.createdAt)
+        return orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear
+      })
+      .reduce((sum, order) => sum + (order.amount || 0), 0)
+    
+    // Calculate pending withdrawals (completed orders not yet withdrawn)
+    const pendingWithdrawals = orders
+      .filter(order => order.status === 'Completed')
+      .reduce((sum, order) => sum + (order.amount || 0), 0)
+    
+    return {
+      activeOrders,
+      completedOrders,
+      earnings: monthlyEarnings,
+      pendingWithdrawals
+    }
+  }
+  
   const fetchDashboardData = async () => {
     try {
-      const response = await localStorageService.dashboard.getSeller()
+      // Fetch orders to calculate real-time stats
+      const ordersResponse = await orderService.getSellerOrders()
+      const orders = ordersResponse?.data?.orders || ordersResponse?.orders || ordersResponse?.data || []
+      const ordersArray = Array.isArray(orders) ? orders : []
+      
+      // Calculate stats from actual orders
+      const calculatedStats = calculateStatsFromOrders(ordersArray)
+      
       setStats(prevStats => ({
-        ...response.data.stats || prevStats,
+        ...prevStats,
+        ...calculatedStats,
         // Keep averageRating from real-time fetch
         averageRating: prevStats.averageRating
       }))
@@ -91,9 +135,11 @@ export default function SellerDashboard() {
   const fetchRecentOrders = async () => {
     try {
       const response = await orderService.getSellerOrders()
-      const orders = response.data.orders || []
+      const orders = response?.data?.orders || response?.orders || response?.data || []
+      const ordersArray = Array.isArray(orders) ? orders : []
+      
       // Get the 5 most recent orders
-      const sortedOrders = orders
+      const sortedOrders = ordersArray
         .sort((a, b) => {
           const dateA = new Date(a.createdAt || 0)
           const dateB = new Date(b.createdAt || 0)
@@ -135,87 +181,124 @@ export default function SellerDashboard() {
         </Link>
       </div>
       
-      {/* Summary Cards - Beautiful Design */}
+      {/* Summary Cards - Beautiful Design with Real-time Updates */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-xl transition-all duration-300">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wide">
-              Active Orders
-            </h3>
-            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
+        <Card className="bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-2 border-blue-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-blue-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-blue-800 uppercase tracking-wide">
+                Active Orders
+              </h3>
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
             </div>
+            <p className="text-4xl sm:text-5xl font-extrabold text-blue-900 mb-1 transition-all duration-300">
+              {stats.activeOrders}
+            </p>
+            <p className="text-xs font-medium text-blue-700 mt-2">Orders in progress</p>
           </div>
-          <p className="text-3xl sm:text-4xl font-bold text-blue-900">{stats.activeOrders}</p>
-          <p className="text-xs text-blue-600 mt-2">Orders in progress</p>
         </Card>
         
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-xl transition-all duration-300">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wide">
-              Completed Orders
-            </h3>
-            <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+        <Card className="bg-gradient-to-br from-green-50 via-green-100 to-green-200 border-2 border-green-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-green-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-green-800 uppercase tracking-wide">
+                Completed Orders
+              </h3>
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
             </div>
+            <p className="text-4xl sm:text-5xl font-extrabold text-green-900 mb-1 transition-all duration-300">
+              {stats.completedOrders}
+            </p>
+            <p className="text-xs font-medium text-green-700 mt-2">Successfully delivered</p>
           </div>
-          <p className="text-3xl sm:text-4xl font-bold text-green-900">{stats.completedOrders}</p>
-          <p className="text-xs text-green-600 mt-2">Successfully delivered</p>
         </Card>
         
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-xl transition-all duration-300">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-purple-700 uppercase tracking-wide">
-              Earnings (Month)
-            </h3>
-            <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+        <Card className="bg-gradient-to-br from-purple-50 via-purple-100 to-purple-200 border-2 border-purple-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-purple-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-purple-800 uppercase tracking-wide">
+                Earnings (Month)
+              </h3>
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
             </div>
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-purple-900 transition-all duration-300">
+              PKR {stats.earnings.toLocaleString()}
+            </p>
+            <p className="text-xs font-medium text-purple-700 mt-2">This month's revenue</p>
           </div>
-          <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-purple-900">
-            PKR {stats.earnings.toLocaleString()}
-          </p>
-          <p className="text-xs text-purple-600 mt-2">This month's revenue</p>
         </Card>
         
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-xl transition-all duration-300">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-orange-700 uppercase tracking-wide">
-              Pending Withdrawals
-            </h3>
-            <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+        <Card className="bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-2 border-orange-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-orange-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-orange-800 uppercase tracking-wide">
+                Pending Withdrawals
+              </h3>
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
             </div>
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-orange-900 transition-all duration-300">
+              PKR {stats.pendingWithdrawals.toLocaleString()}
+            </p>
+            <p className="text-xs font-medium text-orange-700 mt-2">Awaiting withdrawal</p>
           </div>
-          <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-900">
-            PKR {stats.pendingWithdrawals.toLocaleString()}
-          </p>
-          <p className="text-xs text-orange-600 mt-2">Awaiting withdrawal</p>
         </Card>
         
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 hover:shadow-xl transition-all duration-300">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-yellow-700 uppercase tracking-wide">
-              Average Rating
-            </h3>
-            <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
+        <Card className="bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200 border-2 border-yellow-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-yellow-800 uppercase tracking-wide">
+                Average Rating
+              </h3>
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </div>
             </div>
+            <div className="flex items-baseline gap-2 mb-1">
+              <p className="text-4xl sm:text-5xl font-extrabold text-yellow-900 transition-all duration-300">
+                {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : '0.0'}
+              </p>
+              <div className="flex items-center gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <svg
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < Math.round(stats.averageRating)
+                        ? 'text-yellow-500 fill-current'
+                        : 'text-yellow-300'
+                    }`}
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                ))}
+              </div>
+            </div>
+            <p className="text-xs font-medium text-yellow-700 mt-2">Out of 5.0 stars</p>
           </div>
-          <p className="text-3xl sm:text-4xl font-bold text-yellow-900">
-            {stats.averageRating.toFixed(1)}
-          </p>
-          <p className="text-xs text-yellow-600 mt-2">Out of 5.0 stars</p>
         </Card>
       </div>
       
