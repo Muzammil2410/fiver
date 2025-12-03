@@ -166,6 +166,15 @@ export default function CreateGig() {
       // Filter out empty requirements
       const processedRequirements = formData.requirements.filter((req) => req.trim())
       
+      // Get user ID - handle both _id (MongoDB) and id formats
+      const userId = user._id || user.id
+      
+      if (!userId) {
+        setError('User ID not found. Please login again.')
+        setLoading(false)
+        return
+      }
+      
       // Associate gig with logged-in freelancer
       const gigData = {
         title: formData.title,
@@ -179,11 +188,11 @@ export default function CreateGig() {
         packages: processedPackages,
         requirements: processedRequirements,
         seller: {
-          id: user.id,
+          id: userId.toString(), // Ensure it's a string
           name: user.name,
           avatar: user.avatar,
-          level: 'Expert', // Default level, can be updated later
-          title: user.username || user.name,
+          level: user.experienceLevel || user.level || 'Expert', // Use experience level from profile if available
+          title: user.title || user.username || user.name,
         },
       }
       
@@ -318,32 +327,6 @@ export default function CreateGig() {
               </div>
             )}
           </div>
-          
-          {/* Base price/delivery - optional, used as fallback if packages not fully configured */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Base Price (PKR) - Optional"
-              type="number"
-              value={formData.price}
-              onChange={(e) =>
-                setFormData({ ...formData, price: e.target.value })
-              }
-              placeholder="Fallback if packages not set"
-            />
-            
-            <Input
-              label="Base Delivery Time (days) - Optional"
-              type="number"
-              value={formData.deliveryTime}
-              onChange={(e) =>
-                setFormData({ ...formData, deliveryTime: e.target.value })
-              }
-              placeholder="Fallback if packages not set"
-            />
-          </div>
-          <p className="text-xs text-neutral-500 -mt-2 mb-4">
-            Note: Package-specific prices and delivery times (configured below) will be used instead of these base values.
-          </p>
           
           <Select
             label="Category"

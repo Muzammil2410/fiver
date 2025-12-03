@@ -325,6 +325,13 @@ export default function Navbar() {
                       {user?.role === 'freelancer' && (
                         <>
                           <Link
+                            to="/seller/profile"
+                            className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            Profile
+                          </Link>
+                          <Link
                             to="/payment-details"
                             className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
                             onClick={() => setUserMenuOpen(false)}
@@ -439,6 +446,17 @@ export default function Navbar() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Wallet
+                    </Link>
+                    <Link
+                      to="/seller/profile"
+                      className={`block px-4 py-2 rounded-md ${
+                        isActive('/seller/profile')
+                          ? 'bg-primary-100 text-primary-700'
+                          : 'text-neutral-700 hover:bg-neutral-100'
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Profile
                     </Link>
                   </>
                 )}

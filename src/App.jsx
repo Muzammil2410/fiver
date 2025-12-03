@@ -38,6 +38,7 @@ import SellerDashboardNew from './pages/SellerDashboard'
 import Profile from './pages/Profile'
 import PaymentDetails from './pages/PaymentDetails'
 import ProfileSettings from './pages/ProfileSettings'
+import SellerProfile from './pages/seller/SellerProfile'
 
 function AppContent() {
   const location = useLocation()
@@ -95,6 +96,16 @@ function AppContent() {
             }
           />
           <Route path="/gigs/:id" element={<GigDetail />} />
+          
+          {/* Seller View Their Own Gigs - Shows only seller's created gigs */}
+          <Route
+            path="/seller-gigs"
+            element={
+              <RequireAuth>
+                <GigsList />
+              </RequireAuth>
+            }
+          />
           
           <Route
             path="/create-gig"
@@ -181,6 +192,16 @@ function AppContent() {
           {/* Profile routes - works for both /seller/:id and /profile/:id */}
           <Route path="/seller/:id" element={<Profile />} />
           <Route path="/profile/:id" element={<Profile />} />
+          
+          {/* Seller Profile - Only for sellers */}
+          <Route
+            path="/seller/profile"
+            element={
+              <RequireAuth>
+                <SellerProfile />
+              </RequireAuth>
+            }
+          />
           
           {/* Payment Details - Only for sellers */}
           <Route

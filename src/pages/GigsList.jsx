@@ -26,8 +26,8 @@ export default function GigsList() {
   
   // Refresh when navigating to this page (e.g., after creating a gig)
   useEffect(() => {
-    // Only fetch if we're on the /gigs route
-    if (location.pathname !== '/gigs') {
+    // Only fetch if we're on the /gigs or /seller-gigs route
+    if (location.pathname !== '/gigs' && location.pathname !== '/seller-gigs') {
       return
     }
     
@@ -82,15 +82,31 @@ export default function GigsList() {
       setLoading(true)
     }
     
-    // console.log('🔄 Fetching gigs...', { isSeller, userId: user?.id })
+    // Determine if this is seller-gigs route (sellers viewing their own gigs)
+    const isSellerGigsRoute = location.pathname === '/seller-gigs'
+    
+    // console.log('🔄 Fetching gigs...', { isSeller, isSellerGigsRoute, userId: user?.id })
     
     try {
       let response = null
       
-      if (isSeller) {
+      // For sellers on /seller-gigs route: Get only their own gigs
+      // For clients on /gigs route: Get all gigs
+      // For sellers on /gigs route: Get all gigs (browse mode)
+      if (isSeller && isSellerGigsRoute) {
+        // Get user ID - handle both _id (MongoDB) and id formats
+        const userId = user?._id || user?.id
+        
+        if (!userId) {
+          toast.error('User ID not found. Please login again.')
+          setLoading(false)
+          fetchingRef.current = false
+          return
+        }
+        
         // For sellers: Get only their own gigs
         const params = {
-          sellerId: user?.id,
+          sellerId: userId.toString(),
           page,
         }
         // console.log('📤 Fetching seller gigs with params:', params)
@@ -265,14 +281,17 @@ export default function GigsList() {
     })
   }, [visibleGigs])
   
+  // Determine if this is seller-gigs route
+  const isSellerGigsRoute = location.pathname === '/seller-gigs'
+  
   return (
     <MainLayout>
       <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
-        {isSeller ? 'Your Gigs' : 'Browse Gigs'}
+        {isSellerGigsRoute ? 'My Gigs' : 'Browse Gigs'}
       </h1>
       
-      {/* Only show filters for clients, not sellers */}
-      {!isSeller && <GigsFilterBar />}
+      {/* Only show filters for clients on /gigs route, not for sellers on /seller-gigs */}
+      {!isSellerGigsRoute && <GigsFilterBar />}
       
       {/* Debug info - commented out for production */}
       {/* {process.env.NODE_ENV === 'development' && (

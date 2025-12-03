@@ -386,8 +386,8 @@ export default function SellerDashboard() {
       </Card>
       
       {/* Shortcuts - Beautiful Design */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <Link to="/gigs" className="group">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <Link to="/seller-gigs" className="group">
           <Card className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-indigo-100 to-purple-50 border-2 border-indigo-200 hover:border-indigo-400 hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
             <div className="p-6">
               <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
@@ -414,36 +414,6 @@ export default function SellerDashboard() {
               <p className="text-sm text-blue-700">View all orders</p>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-          </Card>
-        </Link>
-        
-        <Link to="/wallet" className="group">
-          <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 via-green-100 to-emerald-50 border-2 border-green-200 hover:border-green-400 hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
-            <div className="p-6">
-              <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg text-green-900 mb-1">Wallet</h3>
-              <p className="text-sm text-green-700">Manage earnings</p>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-emerald-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-          </Card>
-        </Link>
-        
-        <Link to="/analytics" className="group">
-          <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-orange-100 to-red-50 border-2 border-orange-200 hover:border-orange-400 hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
-            <div className="p-6">
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg text-orange-900 mb-1">Analytics</h3>
-              <p className="text-sm text-orange-700">View insights</p>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-red-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
           </Card>
         </Link>
       </div>

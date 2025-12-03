@@ -126,55 +126,65 @@ export default function ChatWindow({ orderId }) {
             No messages yet. Start the conversation!
           </div>
         ) : (
-          messages.map((message) => (
-            <div
-              key={message._id || message.id}
-              className={`flex gap-3 ${
-                message.senderType === 'buyer' ? 'flex-row' : 'flex-row-reverse'
-              }`}
-            >
-              <Avatar
-                src={message.senderAvatar}
-                name={message.senderName}
-                size="sm"
-              />
+          messages.map((message) => {
+            // Check if message is from current user (outgoing) or from others (incoming)
+            const currentUserId = user?._id || user?.id
+            const messageSenderId = message.senderId?.toString()
+            const isOutgoing = currentUserId && messageSenderId && (
+              messageSenderId === currentUserId.toString() || 
+              messageSenderId === String(currentUserId)
+            )
+            
+            return (
               <div
-                className={`flex-1 max-w-[70%] ${
-                  message.senderType === 'buyer'
-                    ? 'items-start'
-                    : 'items-end'
+                key={message._id || message.id}
+                className={`flex gap-3 ${
+                  isOutgoing ? 'flex-row-reverse' : 'flex-row'
                 }`}
               >
+                <Avatar
+                  src={message.senderAvatar}
+                  name={message.senderName}
+                  size="sm"
+                />
                 <div
-                  className={`rounded-lg p-3 ${
-                    message.senderType === 'buyer'
-                      ? 'bg-neutral-100 text-neutral-900'
-                      : 'bg-primary-600 text-white'
+                  className={`flex-1 max-w-[70%] ${
+                    isOutgoing
+                      ? 'items-end'
+                      : 'items-start'
                   }`}
                 >
-                  <p className="text-sm">{message.text}</p>
-                  {message.attachments && message.attachments.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {message.attachments.map((att, idx) => (
-                        <a
-                          key={idx}
-                          href={att.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm underline"
-                        >
-                          {att.name}
-                        </a>
-                      ))}
-                    </div>
-                  )}
+                  <div
+                    className={`rounded-lg p-3 ${
+                      isOutgoing
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-neutral-100 text-neutral-900'
+                    }`}
+                  >
+                    <p className="text-sm">{message.text}</p>
+                    {message.attachments && message.attachments.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {message.attachments.map((att, idx) => (
+                          <a
+                            key={idx}
+                            href={att.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm underline"
+                          >
+                            {att.name}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    {new Date(message.createdAt).toLocaleTimeString()}
+                  </p>
                 </div>
-                <p className="text-xs text-neutral-500 mt-1">
-                  {new Date(message.createdAt).toLocaleTimeString()}
-                </p>
               </div>
-            </div>
-          ))
+            )
+          })
         )}
         <div ref={messagesEndRef} />
       </div>

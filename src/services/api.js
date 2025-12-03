@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/useAuthStore'
 // Create axios instance with base URL
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
-  timeout: 30000, // 30 seconds timeout for API calls
+  timeout: 15000, // 15 seconds timeout for API calls (reduced for faster failure detection)
   headers: {
     'Content-Type': 'application/json',
   },
