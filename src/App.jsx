@@ -29,6 +29,8 @@ import WalletPage from './pages/wallet/WalletPage'
 import SellerDashboard from './pages/dashboard/SellerDashboard'
 import ClientDashboard from './pages/dashboard/ClientDashboard'
 import AdminPanel from './pages/admin/AdminPanel'
+import AdminLogin from './pages/admin/AdminLogin'
+import AdminDashboard from './pages/admin/AdminDashboard'
 import Projects from './pages/Projects'
 import CreateProject from './pages/projects/CreateProject'
 import Marketplace from './pages/Marketplace'
@@ -199,6 +201,10 @@ function AppContent() {
               </RequireAuth>
             }
           />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           
           <Route
             path="/admin"
