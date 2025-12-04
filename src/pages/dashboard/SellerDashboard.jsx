@@ -184,7 +184,7 @@ export default function SellerDashboard() {
       </div>
       
       {/* Summary Cards - Beautiful Design with Real-time Updates */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-6 sm:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card className="bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-2 border-blue-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-20 h-20 bg-blue-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
           <div className="relative">
@@ -225,45 +225,27 @@ export default function SellerDashboard() {
           </div>
         </Card>
         
-        <Card className="bg-gradient-to-br from-purple-50 via-purple-100 to-purple-200 border-2 border-purple-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-purple-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
-          <div className="relative">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-purple-800 uppercase tracking-wide">
-                Earnings (Month)
-              </h3>
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+        <Link to="/withdrawal-requests" className="group">
+          <Card className="bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-2 border-orange-300 hover:border-orange-400 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden cursor-pointer">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-orange-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
+            <div className="relative">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-orange-800 uppercase tracking-wide">
+                  Request Withdrawal
+                </h3>
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
               </div>
+              <p className="text-base sm:text-lg font-bold text-orange-900 transition-all duration-300 mb-2">
+                Click to Request
+              </p>
+              <p className="text-xs font-medium text-orange-700">Request withdrawal for completed orders</p>
             </div>
-            <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-purple-900 transition-all duration-300">
-              PKR {stats.earnings.toLocaleString()}
-            </p>
-            <p className="text-xs font-medium text-purple-700 mt-2">This month's revenue</p>
-          </div>
-        </Card>
-        
-        <Card className="bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-2 border-orange-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-orange-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
-          <div className="relative">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-orange-800 uppercase tracking-wide">
-                Pending Withdrawals
-              </h3>
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-orange-900 transition-all duration-300">
-              PKR {stats.pendingWithdrawals.toLocaleString()}
-            </p>
-            <p className="text-xs font-medium text-orange-700 mt-2">Awaiting withdrawal</p>
-          </div>
-        </Card>
+          </Card>
+        </Link>
         
         <Card className="bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200 border-2 border-yellow-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>

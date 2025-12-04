@@ -39,6 +39,7 @@ import Profile from './pages/Profile'
 import PaymentDetails from './pages/PaymentDetails'
 import ProfileSettings from './pages/ProfileSettings'
 import SellerProfile from './pages/seller/SellerProfile'
+import WithdrawalRequests from './pages/WithdrawalRequests'
 
 function AppContent() {
   const location = useLocation()
@@ -181,6 +182,15 @@ function AppContent() {
             element={
               <RequireAuth>
                 <SellerDashboard />
+              </RequireAuth>
+            }
+          />
+          
+          <Route
+            path="/withdrawal-requests"
+            element={
+              <RequireAuth>
+                <WithdrawalRequests />
               </RequireAuth>
             }
           />

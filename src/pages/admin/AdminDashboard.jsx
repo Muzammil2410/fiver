@@ -21,6 +21,9 @@ export default function AdminDashboard() {
   const [orderHistoryLoading, setOrderHistoryLoading] = useState(false)
   const [clients, setClients] = useState([])
   const [clientsLoading, setClientsLoading] = useState(false)
+  const [withdrawalRequests, setWithdrawalRequests] = useState([])
+  const [withdrawalRequestsLoading, setWithdrawalRequestsLoading] = useState(false)
+  const [processingWithdrawalId, setProcessingWithdrawalId] = useState(null)
   
   // Admin's own payment details
   const [adminPaymentForm, setAdminPaymentForm] = useState({
@@ -195,6 +198,65 @@ export default function AdminDashboard() {
       return () => clearInterval(interval)
     }
   }, [activeSection, fetchOrderHistory])
+
+  const fetchWithdrawalRequests = useCallback(async () => {
+    setWithdrawalRequestsLoading(true)
+    try {
+      const adminToken = localStorage.getItem('admin-token')
+      if (!adminToken) {
+        navigate('/admin/login')
+        return
+      }
+      
+      const response = await api.get('/admin/withdrawals')
+      if (response.data.success) {
+        setWithdrawalRequests(response.data.data.withdrawalRequests || [])
+      }
+    } catch (error) {
+      console.error('Error fetching withdrawal requests:', error)
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem('admin-token')
+        localStorage.removeItem('admin-user')
+        navigate('/admin/login')
+        toast.error('Session expired. Please login again.')
+      } else {
+        toast.error('Failed to fetch withdrawal requests')
+      }
+    } finally {
+      setWithdrawalRequestsLoading(false)
+    }
+  }, [navigate])
+
+  useEffect(() => {
+    if (activeSection === 'withdrawals') {
+      fetchWithdrawalRequests()
+      // Refresh every 10 seconds when on withdrawals section
+      const interval = setInterval(fetchWithdrawalRequests, 10000)
+      return () => clearInterval(interval)
+    }
+  }, [activeSection, fetchWithdrawalRequests])
+
+  const handleProcessWithdrawal = async (orderId, action) => {
+    setProcessingWithdrawalId(orderId)
+    try {
+      const adminToken = localStorage.getItem('admin-token')
+      if (!adminToken) {
+        navigate('/admin/login')
+        return
+      }
+      
+      const response = await api.post(`/admin/withdrawals/${orderId}/process`, { action })
+      if (response.data.success) {
+        toast.success(`Withdrawal ${action === 'approve' ? 'approved' : 'rejected'} successfully`)
+        await fetchWithdrawalRequests()
+      }
+    } catch (error) {
+      console.error('Error processing withdrawal:', error)
+      toast.error(error.response?.data?.message || 'Failed to process withdrawal')
+    } finally {
+      setProcessingWithdrawalId(null)
+    }
+  }
 
   const fetchClients = useCallback(async () => {
     setClientsLoading(true)
@@ -416,6 +478,7 @@ export default function AdminDashboard() {
     { id: 'sellers', label: 'Sellers', icon: '💼' },
     { id: 'orders', label: 'Orders', icon: '📦' },
     { id: 'order-history', label: 'Order History', icon: '📋' },
+    { id: 'withdrawals', label: 'Withdrawal Requests', icon: '💸' },
     { id: 'gigs', label: 'Gigs', icon: '🎯' },
     { id: 'my-payment-details', label: 'My Payment Details', icon: '💰' },
     { id: 'payment-details', label: 'Payment Details', icon: '💳' },
@@ -1094,6 +1157,228 @@ export default function AdminDashboard() {
                                   )}
                                 </div>
                               </div>
+                            </div>
+                          </div>
+                        </Card>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeSection === 'withdrawals' && (
+            <div className="space-y-4 sm:space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+                    Withdrawal Requests
+                  </h1>
+                  <p className="text-xs sm:text-sm text-neutral-500 mt-1">
+                    Review and process seller withdrawal requests
+                  </p>
+                </div>
+                <Button
+                  onClick={fetchWithdrawalRequests}
+                  disabled={withdrawalRequestsLoading}
+                  variant="secondary"
+                  className="w-full sm:w-auto"
+                >
+                  {withdrawalRequestsLoading ? 'Refreshing...' : '🔄 Refresh'}
+                </Button>
+              </div>
+
+              {withdrawalRequestsLoading && withdrawalRequests.length === 0 ? (
+                <Card className="shadow-lg">
+                  <div className="p-8 sm:p-12">
+                    <div className="flex items-center justify-center py-8">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                        <p className="text-neutral-600 font-medium">Loading withdrawal requests...</p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ) : !withdrawalRequestsLoading && withdrawalRequests.length === 0 ? (
+                <Card className="shadow-lg">
+                  <div className="p-8 sm:p-12">
+                    <div className="flex items-center justify-center py-8">
+                      <div className="text-center">
+                        <div className="text-6xl mb-4">💸</div>
+                        <p className="text-lg sm:text-xl font-semibold text-neutral-700 mb-2">
+                          No withdrawal requests
+                        </p>
+                        <p className="text-sm text-neutral-500">
+                          Withdrawal requests from sellers will appear here
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ) : (
+                <div className="space-y-4 sm:space-y-6">
+                  <Card className="shadow-lg bg-gradient-to-r from-orange-50 to-amber-50 border-l-4 border-l-orange-500">
+                    <div className="p-4 sm:p-5">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm sm:text-base font-semibold text-neutral-900">
+                            Pending Requests
+                          </p>
+                          <p className="text-xs text-neutral-600 mt-1">
+                            Withdrawal requests awaiting approval
+                          </p>
+                        </div>
+                        <div className="px-4 py-2 bg-white rounded-lg shadow-sm">
+                          <p className="text-2xl sm:text-3xl font-bold text-orange-600">
+                            {withdrawalRequests.length}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                    {withdrawalRequests.map((request) => {
+                      const orderId = request._id || request.id
+                      const formatDate = (date) => {
+                        if (!date) return 'N/A'
+                        return new Date(date).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                      }
+
+                      return (
+                        <Card key={orderId} className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-orange-500">
+                          <div className="p-5 sm:p-6">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4 mb-4">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 mb-3">
+                                  {request.gigTitle || 'Order'}
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-neutral-500">👤</span>
+                                    <span className="font-medium text-neutral-700">Seller:</span>
+                                    <span className="text-neutral-900">{request.seller?.name || request.sellerName || 'Unknown'}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-neutral-500">📧</span>
+                                    <span className="font-medium text-neutral-700">Email:</span>
+                                    <span className="text-neutral-900">{request.seller?.email || 'N/A'}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-neutral-500">👤</span>
+                                    <span className="font-medium text-neutral-700">Buyer:</span>
+                                    <span className="text-neutral-900">{request.buyerName}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-neutral-500">📅</span>
+                                    <span className="font-medium text-neutral-700">Requested:</span>
+                                    <span className="text-neutral-600">{formatDate(request.withdrawalRequestedAt)}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 sm:col-span-2">
+                                    <span className="text-neutral-500">💰</span>
+                                    <span className="font-medium text-neutral-700">Amount:</span>
+                                    <span className="font-bold text-primary-600 text-lg">PKR {request.amount?.toLocaleString() || '0'}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Seller Payment Details */}
+                            {request.paymentDetails ? (
+                              <div className="mt-4 pt-4 border-t-2 border-neutral-200">
+                                <h4 className="text-base sm:text-lg font-bold text-neutral-900 mb-3 flex items-center gap-2">
+                                  <span>💳</span>
+                                  Seller Payment Details
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                  <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">Payment Method</p>
+                                    <p className="text-sm sm:text-base font-bold text-neutral-900">
+                                      {request.paymentDetails.paymentMethod?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'N/A'}
+                                    </p>
+                                  </div>
+                                  <div className="p-3 bg-gradient-to-br from-white to-neutral-50 rounded-lg border border-neutral-200">
+                                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">Account Number</p>
+                                    <p className="text-sm sm:text-base font-bold text-neutral-900 break-all">
+                                      {request.paymentDetails.accountNumber || 'N/A'}
+                                    </p>
+                                  </div>
+                                  <div className="p-3 bg-gradient-to-br from-white to-neutral-50 rounded-lg border border-neutral-200">
+                                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">Account Holder Name</p>
+                                    <p className="text-sm sm:text-base font-bold text-neutral-900">
+                                      {request.paymentDetails.accountHolderName || 'N/A'}
+                                    </p>
+                                  </div>
+                                  {request.paymentDetails.bankName && (
+                                    <div className="p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">Bank Name</p>
+                                      <p className="text-sm sm:text-base font-bold text-neutral-900">
+                                        {request.paymentDetails.bankName}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {request.paymentDetails.bankAccountName && (
+                                    <div className="p-3 bg-gradient-to-br from-white to-neutral-50 rounded-lg border border-neutral-200">
+                                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">Bank Account Name</p>
+                                      <p className="text-sm sm:text-base font-bold text-neutral-900">
+                                        {request.paymentDetails.bankAccountName}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {request.paymentDetails.branchCode && (
+                                    <div className="p-3 bg-gradient-to-br from-white to-neutral-50 rounded-lg border border-neutral-200">
+                                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">Branch Code</p>
+                                      <p className="text-sm sm:text-base font-bold text-neutral-900">
+                                        {request.paymentDetails.branchCode}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {request.paymentDetails.ibanNumber && (
+                                    <div className="p-3 bg-gradient-to-br from-white to-neutral-50 rounded-lg border border-neutral-200 sm:col-span-2">
+                                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">IBAN Number</p>
+                                      <p className="text-sm sm:text-base font-bold text-neutral-900 break-all">
+                                        {request.paymentDetails.ibanNumber}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="mt-4 pt-4 border-t-2 border-neutral-200">
+                                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                  <p className="text-sm font-medium text-yellow-800 flex items-center gap-2">
+                                    <span>⚠️</span>
+                                    Seller has not set payment details yet
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t-2 border-neutral-200 mt-4">
+                              <Button
+                                onClick={() => handleProcessWithdrawal(orderId, 'approve')}
+                                loading={processingWithdrawalId === orderId}
+                                disabled={processingWithdrawalId !== null}
+                                className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all"
+                              >
+                                ✅ Approve Withdrawal
+                              </Button>
+                              <Button
+                                onClick={() => handleProcessWithdrawal(orderId, 'reject')}
+                                variant="secondary"
+                                loading={processingWithdrawalId === orderId}
+                                disabled={processingWithdrawalId !== null}
+                                className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md hover:shadow-lg transition-all"
+                              >
+                                ❌ Reject
+                              </Button>
                             </div>
                           </div>
                         </Card>

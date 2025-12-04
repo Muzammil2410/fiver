@@ -102,3 +102,23 @@ export const confirmCompletion = async (orderId) => {
     throw new Error(error.response?.data?.message || 'Failed to confirm completion')
   }
 }
+
+// Request withdrawal for an order (seller only)
+export const requestWithdrawal = async (orderId) => {
+  try {
+    const response = await api.post(`/orders/${orderId}/request-withdrawal`)
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to request withdrawal')
+  }
+}
+
+// Get orders eligible for withdrawal (seller only)
+export const getWithdrawalEligibleOrders = async () => {
+  try {
+    const response = await api.get('/orders/withdrawal/eligible')
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch eligible orders')
+  }
+}
