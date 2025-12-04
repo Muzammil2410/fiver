@@ -148,30 +148,54 @@ export default function GigsList() {
       // Extract gigs from response - optimized parsing
       let fetchedGigs = []
       
-      // Backend returns: { success: true, data: { gigs: [...], pagination: {...} } }
-      // Optimized: check most common path first
-      if (response?.data?.gigs && Array.isArray(response.data.gigs)) {
-        fetchedGigs = response.data.gigs
-      } else if (response?.data && Array.isArray(response.data) && !response.data.gigs) {
-        fetchedGigs = response.data
-      } else if (Array.isArray(response)) {
-        fetchedGigs = response
-      } else if (response?.gigs && Array.isArray(response.gigs)) {
-        fetchedGigs = response.gigs
+      // Log response for debugging
+      console.log('📦 API Response:', {
+        hasResponse: !!response,
+        hasData: !!response?.data,
+        hasGigs: !!response?.data?.gigs,
+        success: response?.success,
+        responseKeys: response ? Object.keys(response) : [],
+        dataKeys: response?.data ? Object.keys(response.data) : []
+      })
+      
+      // Check if response indicates failure
+      if (response?.success === false) {
+        console.warn('⚠️ API returned success: false', response)
+        // Even on failure, try to extract gigs if available
+        if (response?.data?.gigs && Array.isArray(response.data.gigs)) {
+          fetchedGigs = response.data.gigs
+        }
+      } else {
+        // Backend returns: { success: true, data: { gigs: [...], pagination: {...} } }
+        // Optimized: check most common path first
+        if (response?.data?.gigs && Array.isArray(response.data.gigs)) {
+          fetchedGigs = response.data.gigs
+        } else if (response?.data && Array.isArray(response.data) && !response.data.gigs) {
+          fetchedGigs = response.data
+        } else if (Array.isArray(response)) {
+          fetchedGigs = response
+        } else if (response?.gigs && Array.isArray(response.gigs)) {
+          fetchedGigs = response.gigs
+        }
       }
       
-      // console.log('✅ Final fetched gigs count:', fetchedGigs.length)
+      console.log('✅ Final fetched gigs count:', fetchedGigs.length)
       
       // Always update state with fetched data
-      if (Array.isArray(fetchedGigs) && fetchedGigs.length > 0) {
-        // Set gigs first
+      if (Array.isArray(fetchedGigs)) {
+        // Set gigs (even if empty)
         setGigs(fetchedGigs)
         
-        // Progressive rendering - render in batches for better performance
-        setVisibleGigs([]) // Reset visible gigs
-        renderGigsProgressively(fetchedGigs)
+        if (fetchedGigs.length > 0) {
+          // Progressive rendering - render in batches for better performance
+          setVisibleGigs([]) // Reset visible gigs
+          renderGigsProgressively(fetchedGigs)
+        } else {
+          // Empty array - clear visible gigs
+          setVisibleGigs([])
+        }
         
-        // ALWAYS set loading to false when we have gigs - do it immediately
+        // ALWAYS set loading to false - do it immediately
         setLoading(false)
         isInitialLoadRef.current = false
         
@@ -181,16 +205,11 @@ export default function GigsList() {
         } else if (response?.pagination) {
           setHasMore(response.pagination.hasMore || false)
         }
-      } else if (Array.isArray(fetchedGigs)) {
-        // Empty array
-        // console.log('⚠️ Fetched empty array of gigs')
-        setGigs([])
-        setLoading(false)
-        isInitialLoadRef.current = false
       } else {
         // If response structure is unexpected, log and set empty array
         console.warn('⚠️ Unexpected response structure - not an array:', response)
         setGigs([])
+        setVisibleGigs([])
         setLoading(false)
         isInitialLoadRef.current = false
       }
@@ -199,22 +218,28 @@ export default function GigsList() {
       console.error('Error details:', {
         message: error.message,
         response: error.response?.data,
-        status: error.response?.status
+        status: error.response?.status,
+        config: error.config
       })
       // Show error message
       if (isInitialLoadRef.current) {
         toast.error(error.message || 'Failed to fetch gigs. Please check if the server is running.')
         setGigs([])
+        setLoading(false)
       } else {
         // On subsequent errors, show a less intrusive message
         console.warn('Failed to refresh gigs:', error.message)
         // Don't clear existing gigs on refresh errors
       }
       isInitialLoadRef.current = false
+      fetchingRef.current = false
     } finally {
       // Always reset fetching flag
       fetchingRef.current = false
-      // Loading state is now managed in the try block after setting gigs
+      // Ensure loading is false
+      if (isInitialLoadRef.current) {
+        setLoading(false)
+      }
     }
   }
   
@@ -286,9 +311,16 @@ export default function GigsList() {
   
   return (
     <MainLayout>
-      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
-        {isSellerGigsRoute ? 'My Gigs' : 'Browse Gigs'}
-      </h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+          {isSellerGigsRoute ? 'My Gigs' : 'Browse Gigs'}
+        </h1>
+        <p className="text-sm sm:text-base text-neutral-600">
+          {isSellerGigsRoute 
+            ? 'Manage and view all your created gigs' 
+            : 'Discover amazing services from talented freelancers'}
+        </p>
+      </div>
       
       {/* Only show filters for clients on /gigs route, not for sellers on /seller-gigs */}
       {!isSellerGigsRoute && <GigsFilterBar />}
@@ -322,12 +354,12 @@ export default function GigsList() {
           </div>
           
           {!isSeller && hasMore && (
-            <div className="text-center mt-8">
+            <div className="text-center mt-8 sm:mt-12">
               <button
                 onClick={handleLoadMore}
-                className="px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+                className="px-8 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
               >
-                Load More
+                Load More Gigs
               </button>
             </div>
           )}
@@ -339,15 +371,25 @@ export default function GigsList() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
-          <p className="text-neutral-600">
-            {isSeller ? 'You haven\'t created any gigs yet.' : 'No gigs found. Try adjusting your filters.'}
-          </p>
-          {process.env.NODE_ENV === 'development' && (
-            <p className="text-xs text-gray-500 mt-2">
-              Check console for API response details
+        <div className="text-center py-12 sm:py-16">
+          <div className="max-w-md mx-auto">
+            <div className="text-6xl sm:text-7xl mb-4">
+              {isSeller ? '🎯' : '🔍'}
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
+              {isSeller ? 'No gigs created yet' : 'No gigs found'}
+            </h3>
+            <p className="text-base sm:text-lg text-neutral-600 mb-4">
+              {isSeller 
+                ? 'Start creating your first gig to showcase your services' 
+                : 'Try adjusting your filters or search terms'}
             </p>
-          )}
+            {process.env.NODE_ENV === 'development' && (
+              <p className="text-xs text-gray-500 mt-2">
+                Check console for API response details
+              </p>
+            )}
+          </div>
         </div>
       )}
     </MainLayout>

@@ -90,3 +90,15 @@ export const completeOrder = async (orderId) => {
     throw new Error(error.response?.data?.message || 'Failed to complete order')
   }
 }
+
+// Confirm completion (client only) - client confirms that order is completed
+export const confirmCompletion = async (orderId) => {
+  try {
+    const response = await api.put(`/orders/${orderId}`, {
+      confirmCompletion: true
+    })
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to confirm completion')
+  }
+}

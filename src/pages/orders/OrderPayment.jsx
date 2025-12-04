@@ -19,6 +19,7 @@ export default function OrderPayment() {
   const user = useAuthStore((state) => state.user)
   const [gig, setGig] = useState(null)
   const [sellerPaymentDetails, setSellerPaymentDetails] = useState(null)
+  const [adminPaymentDetails, setAdminPaymentDetails] = useState(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [paymentScreenshot, setPaymentScreenshot] = useState(null)
@@ -33,7 +34,34 @@ export default function OrderPayment() {
 
   useEffect(() => {
     fetchGigAndPaymentDetails()
+    loadAdminPaymentDetails()
   }, [gigId])
+
+  // Load admin payment details
+  const loadAdminPaymentDetails = async () => {
+    try {
+      console.log('🔍 Fetching admin payment details from API...')
+      
+      const paymentResponse = await paymentDetailsService.getAdminPaymentDetails()
+      console.log('📥 Admin payment details response:', paymentResponse)
+      
+      if (paymentResponse && paymentResponse.success && paymentResponse.data) {
+        if (paymentResponse.data.paymentMethod) {
+          console.log('✅ Found admin payment details!')
+          setAdminPaymentDetails(paymentResponse.data)
+        } else {
+          console.log('⚠️ Admin payment details found but no paymentMethod field')
+          setAdminPaymentDetails(null)
+        }
+      } else {
+        console.log('⚠️ Admin payment details not found')
+        setAdminPaymentDetails(null)
+      }
+    } catch (error) {
+      console.error('❌ Error loading admin payment details:', error)
+      setAdminPaymentDetails(null)
+    }
+  }
 
   const loadSellerPaymentDetails = (sellerId, sellerName = null) => {
     if (!sellerId) {
@@ -355,18 +383,57 @@ export default function OrderPayment() {
     setSubmitting(true)
     
     try {
+      // Validate required fields before submitting
+      const gigId = gig._id || gig.id
+      const sellerId = gig.sellerId || gig.seller?.id || (gig.seller && gig.seller.id)
+      
+      console.log('Order submission - Gig data:', {
+        gigId,
+        sellerId,
+        gigSellerId: gig.sellerId,
+        gigSeller: gig.seller,
+        hasGig: !!gig
+      })
+      
+      if (!gigId) {
+        setError('Gig information is missing. Please try again.')
+        toast.error('Gig information is missing')
+        setSubmitting(false)
+        return
+      }
+
+      if (!sellerId) {
+        console.error('Seller ID missing. Gig data:', gig)
+        setError('Seller information is missing. Please refresh the page and try again.')
+        toast.error('Seller information is missing')
+        setSubmitting(false)
+        return
+      }
+
+      if (!orderAmount || orderAmount <= 0) {
+        setError('Order amount is invalid. Please select a package.')
+        toast.error('Invalid order amount')
+        setSubmitting(false)
+        return
+      }
+
       const orderData = {
-        gigId: gig._id || gig.id,
-        gigTitle: gig.title,
-        sellerId: gig.sellerId || gig.seller?.id,
+        gigId: gigId.toString(),
+        gigTitle: gig.title || 'Gig Order',
+        sellerId: sellerId.toString(),
         sellerName: gig.seller?.name || 'Seller',
         buyerName: user.name,
         package: selectedPackage?.name || 'standard',
-        amount: orderAmount,
+        amount: parseFloat(orderAmount),
         paymentScreenshot: paymentScreenshot,
         requirements: requirements.trim(),
         deliveryTime: selectedPackage?.deliveryTime || gig.deliveryTime || 0,
       }
+      
+      console.log('Submitting order with data:', {
+        ...orderData,
+        paymentScreenshot: paymentScreenshot ? `${paymentScreenshot.substring(0, 50)}... (${(paymentScreenshot.length / 1024).toFixed(2)} KB)` : null
+      })
       
       const response = await orderService.createOrder(orderData)
       
@@ -393,8 +460,10 @@ export default function OrderPayment() {
       setCreatedOrder(response.data?.data || response.data)
       setOrderCreated(true)
     } catch (err) {
-      setError(err.message || 'Failed to place order')
-      toast.error('Failed to place order')
+      console.error('Order creation error:', err)
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to place order'
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setSubmitting(false)
     }
@@ -585,28 +654,20 @@ export default function OrderPayment() {
             </Card>
           </div>
 
-          {/* Right Column - Seller Payment Details */}
+          {/* Right Column - Admin Payment Details */}
           <div className="lg:col-span-1">
             <Card className="lg:sticky lg:top-4">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Seller Payment Details</h2>
+                <h2 className="text-xl font-semibold">Payment Details</h2>
                 <button
                   type="button"
                   onClick={async () => {
-                    const sellerId = gig?.sellerId || gig?.seller?.id
-                    if (sellerId) {
-                      try {
-                        setSellerPaymentDetails(null)
-                        const paymentResponse = await paymentDetailsService.getPaymentDetailsByUserId(sellerId)
-                        if (paymentResponse.success && paymentResponse.data && paymentResponse.data.paymentMethod) {
-                          setSellerPaymentDetails(paymentResponse.data)
-                          toast.success('Payment details refreshed')
-                        } else {
-                          toast.error('Payment details not found')
-                        }
-                      } catch (error) {
-                        toast.error('Failed to refresh payment details')
-                      }
+                    try {
+                      setAdminPaymentDetails(null)
+                      await loadAdminPaymentDetails()
+                      toast.success('Payment details refreshed')
+                    } catch (error) {
+                      toast.error('Failed to refresh payment details')
                     }
                   }}
                   className="text-primary-600 hover:text-primary-700 text-sm font-medium"
@@ -615,66 +676,77 @@ export default function OrderPayment() {
                   🔄 Refresh
                 </button>
               </div>
-              {sellerPaymentDetails ? (
+              {adminPaymentDetails ? (
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm font-medium text-neutral-700">Payment Method</p>
                     <p className="text-base font-semibold capitalize">
-                      {sellerPaymentDetails.paymentMethod?.replace(/-/g, ' ') || 'N/A'}
+                      {adminPaymentDetails.paymentMethod?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'N/A'}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-neutral-700">Account Number</p>
                     <p className="text-base font-semibold">
-                      {sellerPaymentDetails.accountNumber || 'N/A'}
+                      {adminPaymentDetails.accountNumber || 'N/A'}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-neutral-700">Account Holder Name</p>
                     <p className="text-base font-semibold">
-                      {sellerPaymentDetails.accountHolderName || 'N/A'}
+                      {adminPaymentDetails.accountHolderName || 'N/A'}
                     </p>
                   </div>
-                  {sellerPaymentDetails.branchCode && (
+                  {adminPaymentDetails.bankName && (
                     <div>
-                      <p className="text-sm font-medium text-neutral-700">Branch Code</p>
+                      <p className="text-sm font-medium text-neutral-700">Bank Name</p>
                       <p className="text-base font-semibold">
-                        {sellerPaymentDetails.branchCode}
+                        {adminPaymentDetails.bankName}
                       </p>
                     </div>
                   )}
-                  {sellerPaymentDetails.ibanNumber && (
+                  {adminPaymentDetails.bankAccountName && (
+                    <div>
+                      <p className="text-sm font-medium text-neutral-700">Bank Account Name</p>
+                      <p className="text-base font-semibold">
+                        {adminPaymentDetails.bankAccountName}
+                      </p>
+                    </div>
+                  )}
+                  {adminPaymentDetails.branchCode && (
+                    <div>
+                      <p className="text-sm font-medium text-neutral-700">Branch Code</p>
+                      <p className="text-base font-semibold">
+                        {adminPaymentDetails.branchCode}
+                      </p>
+                    </div>
+                  )}
+                  {adminPaymentDetails.ibanNumber && (
                     <div>
                       <p className="text-sm font-medium text-neutral-700">IBAN Number</p>
                       <p className="text-base font-semibold break-all">
-                        {sellerPaymentDetails.ibanNumber}
+                        {adminPaymentDetails.ibanNumber}
                       </p>
                     </div>
                   )}
                   <div className="pt-4 border-t">
                     <p className="text-xs text-neutral-500">
-                      Please transfer the exact amount to the seller's account and upload the payment screenshot.
+                      Please transfer the exact amount to the admin's account and upload the payment screenshot.
                     </p>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <p className="text-neutral-600 text-sm">
-                    Seller has not provided payment details yet.
+                    Admin payment details not available.
                   </p>
                   <p className="text-neutral-500 text-xs mt-2">
-                    Please contact the seller for payment information.
+                    Please contact the admin for payment information.
                   </p>
                   <Button
                     variant="secondary"
                     size="sm"
                     className="mt-4"
-                    onClick={() => {
-                      const sellerId = gig?.sellerId || gig?.seller?.id
-                      if (sellerId) {
-                        loadSellerPaymentDetails(sellerId)
-                      }
-                    }}
+                    onClick={loadAdminPaymentDetails}
                   >
                     Refresh
                   </Button>

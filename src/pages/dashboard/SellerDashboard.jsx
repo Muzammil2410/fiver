@@ -171,11 +171,13 @@ export default function SellerDashboard() {
     <MainLayout>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2">Seller Dashboard</h1>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+            Seller Dashboard
+          </h1>
           <p className="text-sm sm:text-base text-neutral-600">Monitor your orders and earnings in real-time</p>
         </div>
         <Link to="/create-gig" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 text-white px-4 sm:px-6 py-2 sm:py-3 shadow-lg hover:shadow-xl transition-all text-sm sm:text-base">
+          <Button className="w-full sm:w-auto bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-4 sm:px-6 py-2.5 sm:py-3 shadow-lg hover:shadow-xl transition-all text-sm sm:text-base font-semibold transform hover:scale-105">
             Create Gig
           </Button>
         </Link>

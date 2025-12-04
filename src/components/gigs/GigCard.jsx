@@ -202,29 +202,13 @@ function GigCard({ gig }) {
         {/* Rating and Price */}
         <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
           <div className="flex items-center gap-1">
-            {orderCount > 0 && averageRating > 0 ? (
-              <>
-                <span className="text-yellow-500 text-base">★</span>
-                <span className="text-sm font-semibold text-neutral-900">
-                  {orderCount}
-                </span>
-                <span className="text-sm font-semibold text-yellow-500">
-                  ({Math.round(averageRating)})
-                </span>
-              </>
-            ) : orderCount > 0 ? (
-              <>
-                <span className="text-yellow-500 text-base">★</span>
-                <span className="text-sm font-semibold text-neutral-900">
-                  {orderCount}
-                </span>
-                <span className="text-sm font-semibold text-yellow-500">
-                  (0)
-                </span>
-              </>
-            ) : (
-              <span className="text-xs text-neutral-500">No reviews yet</span>
-            )}
+            <span className="text-yellow-500 text-base">★</span>
+            <span className="text-sm font-semibold text-neutral-900">
+              {orderCount || 0}
+            </span>
+            <span className="text-sm font-semibold text-yellow-500">
+              ({Math.round(averageRating) || 0})
+            </span>
           </div>
           <div className="text-lg font-bold text-neutral-900">
             {lowestPrice ? (

@@ -9,6 +9,7 @@ import * as orderService from '../../services/orders'
 import { useAuthStore } from '../../store/useAuthStore'
 import * as reviewService from '../../services/reviews'
 import Skeleton from '../../components/ui/Skeleton'
+import { toast } from '../../utils/toast'
 
 export default function OrdersList() {
   const user = useAuthStore((state) => state.user)
@@ -16,6 +17,7 @@ export default function OrdersList() {
   const [loading, setLoading] = useState(true)
   const [reviews, setReviews] = useState({}) // Store reviews by orderId
   const [showReviewForOrder, setShowReviewForOrder] = useState(null)
+  const [confirmingCompletionId, setConfirmingCompletionId] = useState(null)
   
   useEffect(() => {
     if (user?.id) {
@@ -64,6 +66,20 @@ export default function OrdersList() {
   const handleReviewSuccess = (orderId) => {
     setShowReviewForOrder(null)
     fetchOrders()
+  }
+  
+  const handleConfirmCompletion = async (orderId) => {
+    setConfirmingCompletionId(orderId)
+    try {
+      await orderService.confirmCompletion(orderId)
+      toast.success('Order completion confirmed! You can now leave a review.')
+      await fetchOrders() // Refresh orders
+    } catch (error) {
+      console.error('Error confirming completion:', error)
+      toast.error(error.message || 'Failed to confirm completion')
+    } finally {
+      setConfirmingCompletionId(null)
+    }
   }
   
   const getStatusBadge = (status) => {
@@ -148,22 +164,22 @@ export default function OrdersList() {
     <MainLayout>
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-2">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
                 My Orders
               </h1>
-              <p className="text-neutral-600 text-sm sm:text-base">
+              <p className="text-sm sm:text-base text-neutral-600">
                 Track and manage all your orders in one place
               </p>
             </div>
             {orders.length > 0 && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-primary-50 rounded-lg border border-primary-200">
-                <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-gradient-to-r from-primary-50 to-primary-100 rounded-xl border-2 border-primary-200 shadow-md">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span className="text-sm font-semibold text-primary-700">
+                <span className="text-sm sm:text-base font-bold text-primary-700">
                   {orders.length} {orders.length === 1 ? 'Order' : 'Orders'}
                 </span>
               </div>
@@ -178,19 +194,19 @@ export default function OrdersList() {
             ))}
           </div>
         ) : orders.length === 0 ? (
-          <Card className="border-2 border-dashed border-neutral-200">
+          <Card className="border-2 border-dashed border-neutral-300 shadow-lg">
             <div className="text-center py-12 sm:py-16">
-              <div className="w-20 h-20 mx-auto mb-6 bg-neutral-100 rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-full flex items-center justify-center shadow-md">
+                <svg className="w-10 h-10 sm:w-12 sm:h-12 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-neutral-900 mb-2">No orders yet</h3>
-              <p className="text-neutral-600 mb-6 max-w-md mx-auto">
+              <h3 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">No orders yet</h3>
+              <p className="text-sm sm:text-base text-neutral-600 mb-6 max-w-md mx-auto">
                 When you place an order, it will appear here for easy tracking and management.
               </p>
               <Link to="/gigs">
-                <Button className="bg-primary-600 hover:bg-primary-700 text-white">
+                <Button className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
                   Browse Gigs
                 </Button>
               </Link>
@@ -202,7 +218,10 @@ export default function OrdersList() {
               const orderId = order._id || order.id
               const hasReview = reviews[orderId]
               const isCompleted = order.status === 'Completed'
+              const isConfirmedByClient = !!order.clientConfirmedCompletionAt
               const showReview = showReviewForOrder === orderId && !hasReview
+              const canConfirmCompletion = isCompleted && !isConfirmedByClient
+              const canLeaveReview = isCompleted && isConfirmedByClient && !hasReview
               
               return (
                 <div key={orderId} className="space-y-4">
@@ -241,12 +260,27 @@ export default function OrdersList() {
                             <span className="text-2xl font-bold text-primary-600">
                               PKR {order.amount?.toLocaleString() || 'N/A'}
                             </span>
-                            {isCompleted && !hasReview && !showReview && (
+                            {canConfirmCompletion && (
+                              <Button
+                                onClick={() => handleConfirmCompletion(orderId)}
+                                loading={confirmingCompletionId === orderId}
+                                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm px-3 py-1.5 shadow-md"
+                              >
+                                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Confirm Completion
+                              </Button>
+                            )}
+                            {canLeaveReview && !showReview && (
                               <Button
                                 onClick={() => setShowReviewForOrder(orderId)}
-                                className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-3 py-1.5"
+                                className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white text-sm px-3 py-1.5 shadow-md"
                               >
-                                Review
+                                <svg className="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                                Leave Review
                               </Button>
                             )}
                             {isCompleted && hasReview && (
@@ -301,7 +335,19 @@ export default function OrdersList() {
                         </div>
                         
                         <div className="col-span-12 md:col-span-3 lg:col-span-3 flex justify-end">
-                          {isCompleted && !hasReview && !showReview && (
+                          {canConfirmCompletion && (
+                            <Button
+                              onClick={() => handleConfirmCompletion(orderId)}
+                              loading={confirmingCompletionId === orderId}
+                              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all"
+                            >
+                              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Confirm Completion
+                            </Button>
+                          )}
+                          {canLeaveReview && !showReview && (
                             <Button
                               onClick={() => setShowReviewForOrder(orderId)}
                               className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white shadow-md hover:shadow-lg transition-all"

@@ -13,6 +13,7 @@ export default function PaymentDetails() {
     paymentMethod: '',
     accountNumber: '',
     accountHolderName: '',
+    bankName: '',
     branchCode: '',
     ibanNumber: '',
   })
@@ -110,6 +111,7 @@ export default function PaymentDetails() {
           paymentMethod: formData.paymentMethod,
           accountNumber: formData.accountNumber,
           accountHolderName: formData.accountHolderName,
+          bankName: formData.bankName,
           branchCode: formData.branchCode,
           ibanNumber: formData.ibanNumber,
         })
@@ -127,6 +129,7 @@ export default function PaymentDetails() {
         paymentMethod: '',
         accountNumber: '',
         accountHolderName: '',
+        bankName: '',
         branchCode: '',
         ibanNumber: '',
       })
@@ -145,6 +148,7 @@ export default function PaymentDetails() {
         paymentMethod: savedDetails.paymentMethod || '',
         accountNumber: savedDetails.accountNumber || '',
         accountHolderName: savedDetails.accountHolderName || '',
+        bankName: savedDetails.bankName || '',
         branchCode: savedDetails.branchCode || '',
         ibanNumber: savedDetails.ibanNumber || '',
       })
@@ -153,20 +157,24 @@ export default function PaymentDetails() {
 
   return (
     <MainLayout>
-      <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-2">Payment Details</h1>
-          <p className="text-neutral-600 text-base md:text-lg">Manage your payment information for withdrawals</p>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-10">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+            Payment Details
+          </h1>
+          <p className="text-sm sm:text-base md:text-lg text-neutral-600">
+            Manage your payment information for withdrawals
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8">
           {/* Payment Details Form - Takes 3 columns on large screens */}
           <div className="lg:col-span-3">
-            <Card className="p-6 md:p-8 shadow-lg">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+            <Card className="p-6 sm:p-8 md:p-10 shadow-xl hover:shadow-2xl transition-all duration-300 border-l-4 border-l-primary-500">
+              <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center shadow-md">
                   <svg
-                    className="w-6 h-6 text-primary-600"
+                    className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -179,7 +187,10 @@ export default function PaymentDetails() {
                     />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-semibold text-neutral-900">Payment Information</h2>
+                <div>
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">Payment Information</h2>
+                  <p className="text-xs sm:text-sm text-neutral-500 mt-1">Fill in your payment details below</p>
+                </div>
               </div>
               
               <form onSubmit={handleSave} className="space-y-5">
@@ -221,6 +232,16 @@ export default function PaymentDetails() {
                   onChange={handleInputChange}
                   placeholder="Enter account holder name"
                   required
+                  className="text-base"
+                />
+
+                {/* Bank Name */}
+                <Input
+                  label="Bank Name"
+                  name="bankName"
+                  value={formData.bankName}
+                  onChange={handleInputChange}
+                  placeholder="Enter bank name"
                   className="text-base"
                 />
 
@@ -275,11 +296,11 @@ export default function PaymentDetails() {
           {/* Saved Details Display - Expanded to the right */}
           {savedDetails && (
             <div className="lg:col-span-2">
-              <Card className="p-6 md:p-8 shadow-lg">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center">
+              <Card className="p-6 sm:p-8 md:p-10 shadow-xl hover:shadow-2xl transition-all duration-300 border-l-4 border-l-success-500 bg-gradient-to-br from-success-50/50 to-white">
+                <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-success-100 to-success-200 rounded-xl flex items-center justify-center shadow-md">
                     <svg
-                      className="w-6 h-6 text-success-600"
+                      className="w-6 h-6 sm:w-7 sm:h-7 text-success-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -292,54 +313,68 @@ export default function PaymentDetails() {
                       />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-semibold text-neutral-900">Saved Details</h2>
+                  <div>
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">Saved Details</h2>
+                    <p className="text-xs sm:text-sm text-neutral-500 mt-1">Your current payment information</p>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="p-4 bg-gradient-to-br from-white to-neutral-50 rounded-xl border border-neutral-200 shadow-sm">
+                    <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wide mb-2">
                       Payment Method
                     </h3>
-                    <p className="text-xl font-bold text-neutral-900">
-                      {savedDetails.paymentMethod}
+                    <p className="text-lg sm:text-xl font-bold text-primary-600">
+                      {savedDetails.paymentMethod?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || savedDetails.paymentMethod}
                     </p>
                   </div>
 
-                  <div>
-                    <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">
+                  <div className="p-4 bg-gradient-to-br from-white to-neutral-50 rounded-xl border border-neutral-200 shadow-sm">
+                    <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wide mb-2">
                       Account Number
                     </h3>
-                    <p className="text-xl font-bold text-neutral-900 break-all">
+                    <p className="text-lg sm:text-xl font-bold text-neutral-900 break-all">
                       {savedDetails.accountNumber}
                     </p>
                   </div>
 
-                  <div>
-                    <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">
+                  <div className="p-4 bg-gradient-to-br from-white to-neutral-50 rounded-xl border border-neutral-200 shadow-sm">
+                    <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wide mb-2">
                       Account Holder
                     </h3>
-                    <p className="text-xl font-bold text-neutral-900">
+                    <p className="text-lg sm:text-xl font-bold text-neutral-900">
                       {savedDetails.accountHolderName}
                     </p>
                   </div>
 
+                  {savedDetails.bankName && (
+                    <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 shadow-sm">
+                      <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wide mb-2">
+                        Bank Name
+                      </h3>
+                      <p className="text-lg sm:text-xl font-bold text-neutral-900">
+                        {savedDetails.bankName}
+                      </p>
+                    </div>
+                  )}
+
                   {savedDetails.branchCode && (
-                    <div>
-                      <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">
+                    <div className="p-4 bg-gradient-to-br from-white to-neutral-50 rounded-xl border border-neutral-200 shadow-sm">
+                      <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wide mb-2">
                         Branch Code
                       </h3>
-                      <p className="text-xl font-bold text-neutral-900">
+                      <p className="text-lg sm:text-xl font-bold text-neutral-900">
                         {savedDetails.branchCode}
                       </p>
                     </div>
                   )}
 
                   {savedDetails.ibanNumber && (
-                    <div className="md:col-span-2">
-                      <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">
+                    <div className="p-4 bg-gradient-to-br from-white to-neutral-50 rounded-xl border border-neutral-200 shadow-sm sm:col-span-2">
+                      <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wide mb-2">
                         IBAN Number
                       </h3>
-                      <p className="text-lg font-bold text-neutral-900 break-all">
+                      <p className="text-base sm:text-lg font-bold text-neutral-900 break-all">
                         {savedDetails.ibanNumber}
                       </p>
                     </div>

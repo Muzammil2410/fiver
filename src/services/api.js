@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/useAuthStore'
 // Create axios instance with base URL
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
-  timeout: 15000, // 15 seconds timeout for API calls (reduced for faster failure detection)
+  timeout: 30000, // 30 seconds timeout for API calls
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,11 +13,29 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const { token } = useAuthStore.getState()
-    if (token) {
-      // Use JWT token directly
-      config.headers.Authorization = `Bearer ${token}`
+    // If Authorization header is already set manually, don't override it
+    if (config.headers.Authorization) {
+      return config
     }
+    
+    // Check if this is an admin route
+    const isAdminRoute = config.url?.includes('/admin/')
+    
+    if (isAdminRoute) {
+      // For admin routes, use admin-token from localStorage
+      const adminToken = localStorage.getItem('admin-token')
+      if (adminToken) {
+        config.headers.Authorization = `Bearer ${adminToken}`
+      }
+    } else {
+      // For regular routes, use token from auth store
+      const { token } = useAuthStore.getState()
+      if (token) {
+        // Use JWT token directly
+        config.headers.Authorization = `Bearer ${token}`
+      }
+    }
+    
     return config
   },
   (error) => {
@@ -29,21 +47,32 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Check if this is an admin route
+    const isAdminRoute = error.config?.url?.includes('/admin/')
+    
     if (error.response?.status === 401) {
-      // Get user role before clearing auth state
-      const { user } = useAuthStore.getState()
-      const userRole = user?.role
-      
-      // Clear auth state on 401
-      useAuthStore.getState().logout()
-      
-      // Redirect based on user role
-      if (userRole === 'client') {
-        window.location.href = '/client-login'
-      } else if (userRole === 'freelancer') {
-        window.location.href = '/seller-login'
+      if (isAdminRoute) {
+        // For admin routes, clear admin session and redirect to admin login
+        localStorage.removeItem('admin-token')
+        localStorage.removeItem('admin-user')
+        // Don't redirect here - let the component handle it
+        return Promise.reject(error)
       } else {
-        window.location.href = '/client-login'
+        // For regular routes, clear auth state and redirect
+        const { user } = useAuthStore.getState()
+        const userRole = user?.role
+        
+        // Clear auth state on 401
+        useAuthStore.getState().logout()
+        
+        // Redirect based on user role
+        if (userRole === 'client') {
+          window.location.href = '/client-login'
+        } else if (userRole === 'freelancer') {
+          window.location.href = '/seller-login'
+        } else {
+          window.location.href = '/client-login'
+        }
       }
     }
     return Promise.reject(error)

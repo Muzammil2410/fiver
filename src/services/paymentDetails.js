@@ -31,6 +31,33 @@ export const getPaymentDetailsByUserId = async (userId) => {
   }
 }
 
+// Get admin payment details (public endpoint)
+export const getAdminPaymentDetails = async () => {
+  try {
+    console.log('📡 API Call: GET /payment-details/admin')
+    const response = await api.get('/payment-details/admin')
+    console.log('📥 Admin Payment Details API Response:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('❌ API Error fetching admin payment details:', error)
+    console.error('❌ Status:', error.response?.status)
+    console.error('❌ Data:', error.response?.data)
+    
+    // If not found, return null instead of throwing
+    if (error.response?.status === 404) {
+      return { success: false, data: null, message: 'Admin payment details not found' }
+    }
+    
+    // Network error or other issues
+    if (!error.response) {
+      console.error('❌ Network error - backend server might not be running')
+      return { success: false, data: null, message: 'Backend server not reachable' }
+    }
+    
+    throw new Error(error.response?.data?.message || 'Failed to fetch admin payment details')
+  }
+}
+
 // Save payment details
 export const savePaymentDetails = async (paymentDetails) => {
   try {
