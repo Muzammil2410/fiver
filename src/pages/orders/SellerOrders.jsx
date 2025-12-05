@@ -210,12 +210,24 @@ export default function SellerOrders() {
                           >
                             {order.gigTitle || `Order #${orderId.slice(-8)}`}
                           </Link>
-                          <div className="flex items-center gap-2 mb-3">
+                          <div className="flex items-center gap-2 mb-3 flex-wrap">
                             <Badge variant={getStatusBadge(order.status)} size="sm" className="flex items-center gap-1">
                               {getStatusIcon(order.status)}
                               <span className="hidden xs:inline">{order.status}</span>
                               <span className="xs:hidden">{order.status.split(' ')[0]}</span>
                             </Badge>
+                            {order.withdrawalRequested && (
+                              <Badge 
+                                variant={order.withdrawalStatus === 'approved' ? 'success' : order.withdrawalStatus === 'pending' ? 'warning' : 'default'} 
+                                size="sm"
+                                className="flex items-center gap-1"
+                              >
+                                {order.withdrawalStatus === 'approved' ? '✅ Withdrawal Approved' : 
+                                 order.withdrawalStatus === 'pending' ? '⏳ Withdrawal Pending' : 
+                                 order.withdrawalStatus === 'rejected' ? '❌ Withdrawal Rejected' : 
+                                 'Withdrawal Requested'}
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -293,6 +305,17 @@ export default function SellerOrders() {
                                 {getStatusIcon(order.status)}
                                 {order.status}
                               </Badge>
+                              {order.withdrawalRequested && (
+                                <Badge 
+                                  variant={order.withdrawalStatus === 'approved' ? 'success' : order.withdrawalStatus === 'pending' ? 'warning' : 'default'} 
+                                  className="flex items-center gap-1.5"
+                                >
+                                  {order.withdrawalStatus === 'approved' ? '✅ Withdrawal Approved' : 
+                                   order.withdrawalStatus === 'pending' ? '⏳ Withdrawal Pending' : 
+                                   order.withdrawalStatus === 'rejected' ? '❌ Withdrawal Rejected' : 
+                                   'Withdrawal Requested'}
+                                </Badge>
+                              )}
                               <span className="text-sm text-neutral-500 flex items-center gap-1">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

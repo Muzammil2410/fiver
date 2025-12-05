@@ -87,15 +87,8 @@ function AppContent() {
           <Route path="/seller-signup" element={<SellerSignup />} />
           <Route path="/client-signup" element={<ClientSignup />} />
           
-          {/* Client Browse Gigs - Shows ALL gigs from ALL sellers */}
-          <Route
-            path="/gigs"
-            element={
-              <RequireAuth>
-                <GigsList />
-              </RequireAuth>
-            }
-          />
+          {/* Client Browse Gigs - Shows ALL gigs from ALL sellers (no login required) */}
+          <Route path="/gigs" element={<GigsList />} />
           <Route path="/gigs/:id" element={<GigDetail />} />
           
           {/* Seller View Their Own Gigs - Shows only seller's created gigs */}

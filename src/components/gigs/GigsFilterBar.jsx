@@ -25,6 +25,7 @@ export default function GigsFilterBar() {
   return (
     <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+        {/* Mobile: Stack all filters vertically, Desktop: Grid layout */}
         {/* Category */}
         <div>
           <label className="block text-sm font-medium text-neutral-700 mb-1">
@@ -110,8 +111,8 @@ export default function GigsFilterBar() {
       </div>
       
       {/* Experience Level */}
-      <div className="mt-4 pt-4 border-t border-neutral-200">
-        <label className="block text-sm font-medium text-neutral-700 mb-2">
+      <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-neutral-200">
+        <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-2">
           Experience Level
         </label>
         <div className="flex flex-wrap gap-2">

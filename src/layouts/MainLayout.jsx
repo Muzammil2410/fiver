@@ -31,12 +31,15 @@ export default function MainLayout({ children, showSidebar = false, sidebarRight
     )
   }
   
+  // Check if we're on the dashboard route
+  const isDashboardRoute = location.pathname === '/dashboard'
+  
   return (
     <div className="min-h-screen flex flex-col bg-neutral-50">
       <Navbar />
       <main
         ref={mainRef}
-        className="flex-1 container-main pt-4 sm:pt-6 px-4 sm:px-6"
+        className={`flex-1 pt-4 sm:pt-6 px-4 sm:px-6 mx-auto pb-6 ${isDashboardRoute ? 'max-w-[1440px]' : 'container-main'}`}
         role="main"
         aria-live="polite"
       >

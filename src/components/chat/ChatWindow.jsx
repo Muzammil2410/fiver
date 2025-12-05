@@ -12,12 +12,12 @@ export default function ChatWindow({ orderId }) {
   const messagesEndRef = useRef(null)
   const socketRef = useRef(null)
   const { token, user } = useAuthStore()
-  
+
   useEffect(() => {
     if (!orderId || !token) return
 
     // Initialize Socket.io connection
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://freelancer-services-platform-backend.onrender.com/api'
     const socket = io(API_BASE_URL, {
       auth: {
         token: token
@@ -31,7 +31,7 @@ export default function ChatWindow({ orderId }) {
     socket.on('connect', () => {
       console.log('✅ Connected to chat server')
       setConnected(true)
-      
+
       // Join the order room
       socket.emit('join_order', orderId)
     })
@@ -66,11 +66,11 @@ export default function ChatWindow({ orderId }) {
       }
     }
   }, [orderId, token])
-  
+
   useEffect(() => {
     scrollToBottom()
   }, [messages])
-  
+
   const fetchMessages = async () => {
     try {
       const response = await chatService.getMessages(orderId)
@@ -81,11 +81,11 @@ export default function ChatWindow({ orderId }) {
       setLoading(false)
     }
   }
-  
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
-  
+
   const handleSendMessage = async (text, attachments) => {
     if (!socketRef.current || !connected) {
       console.error('Socket not connected')
@@ -103,17 +103,16 @@ export default function ChatWindow({ orderId }) {
       console.error('Error sending message:', error)
     }
   }
-  
+
   if (loading) {
     return <div className="p-4 text-center">Loading messages...</div>
   }
-  
+
   return (
     <div className="flex flex-col h-[600px] border border-neutral-200 rounded-lg">
       {/* Connection status indicator */}
-      <div className={`px-4 py-2 border-b border-neutral-200 flex items-center gap-2 ${
-        connected ? 'bg-green-50' : 'bg-yellow-50'
-      }`}>
+      <div className={`px-4 py-2 border-b border-neutral-200 flex items-center gap-2 ${connected ? 'bg-green-50' : 'bg-yellow-50'
+        }`}>
         <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-yellow-500'}`} />
         <span className="text-xs text-neutral-600">
           {connected ? 'Connected' : 'Connecting...'}
@@ -131,16 +130,15 @@ export default function ChatWindow({ orderId }) {
             const currentUserId = user?._id || user?.id
             const messageSenderId = message.senderId?.toString()
             const isOutgoing = currentUserId && messageSenderId && (
-              messageSenderId === currentUserId.toString() || 
+              messageSenderId === currentUserId.toString() ||
               messageSenderId === String(currentUserId)
             )
-            
+
             return (
               <div
                 key={message._id || message.id}
-                className={`flex gap-3 ${
-                  isOutgoing ? 'flex-row-reverse' : 'flex-row'
-                }`}
+                className={`flex gap-3 ${isOutgoing ? 'flex-row-reverse' : 'flex-row'
+                  }`}
               >
                 <Avatar
                   src={message.senderAvatar}
@@ -148,18 +146,16 @@ export default function ChatWindow({ orderId }) {
                   size="sm"
                 />
                 <div
-                  className={`flex-1 max-w-[70%] ${
-                    isOutgoing
-                      ? 'items-end'
-                      : 'items-start'
-                  }`}
+                  className={`flex-1 max-w-[70%] ${isOutgoing
+                    ? 'items-end'
+                    : 'items-start'
+                    }`}
                 >
                   <div
-                    className={`rounded-lg p-3 ${
-                      isOutgoing
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-neutral-100 text-neutral-900'
-                    }`}
+                    className={`rounded-lg p-3 ${isOutgoing
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-neutral-100 text-neutral-900'
+                      }`}
                   >
                     <p className="text-sm">{message.text}</p>
                     {message.attachments && message.attachments.length > 0 && (
@@ -188,7 +184,7 @@ export default function ChatWindow({ orderId }) {
         )}
         <div ref={messagesEndRef} />
       </div>
-      
+
       {/* Input */}
       <div className="border-t border-neutral-200 p-4">
         <ChatInput onSend={handleSendMessage} />

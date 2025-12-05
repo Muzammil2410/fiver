@@ -20,6 +20,7 @@ export default function GigDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const [gig, setGig] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
@@ -207,11 +208,34 @@ export default function GigDetail() {
   }
   
   const handleOrder = async (pkg) => {
+    // Check if user is authenticated before allowing order
+    if (!user || !isAuthenticated) {
+      // Redirect to client login page
+      navigate('/client-login', { 
+        state: { 
+          returnTo: `/gigs/${gig._id || gig.id}`,
+          message: 'Please login to place an order'
+        }
+      })
+      return
+    }
+    
     setSelectedPackage(pkg)
     setShowOrderModal(true)
   }
   
   const handleConfirmOrder = () => {
+    // Double check authentication before proceeding
+    if (!user || !isAuthenticated) {
+      navigate('/client-login', { 
+        state: { 
+          returnTo: `/gigs/${gig._id || gig.id}`,
+          message: 'Please login to place an order'
+        }
+      })
+      return
+    }
+    
     // Navigate to payment page with package details
     navigate(`/orders/payment/${gig._id || gig.id}`, {
       state: {
@@ -698,9 +722,9 @@ export default function GigDetail() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Seller Info Card */}
             <Card className="overflow-hidden">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 p-6">
@@ -800,21 +824,21 @@ export default function GigDetail() {
           </div>
         
           {/* Sidebar - Sticky on Desktop */}
-          <div className="lg:sticky lg:top-6 lg:h-fit space-y-6">
+          <div className="lg:sticky lg:top-6 lg:h-fit space-y-4 sm:space-y-6">
             {/* Package Selection Card */}
             <Card className="overflow-hidden shadow-xl border-2 border-primary-100">
-              <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-6 text-white">
-                <h2 className="text-2xl font-bold mb-2">Select Package</h2>
-                <p className="text-primary-100 text-sm">Choose the perfect plan for your needs</p>
+              <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-4 sm:p-6 text-white">
+                <h2 className="text-xl sm:text-2xl font-bold mb-2">Select Package</h2>
+                <p className="text-primary-100 text-xs sm:text-sm">Choose the perfect plan for your needs</p>
               </div>
               
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {gig.packages && gig.packages.length > 0 ? (
                   <div className="space-y-4">
                     {gig.packages.map((pkg, idx) => (
                       <div
                         key={idx}
-                        className={`relative p-5 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
+                        className={`relative p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
                           selectedPackage?.name === pkg.name
                             ? 'border-primary-600 bg-primary-50 shadow-lg scale-[1.02]'
                             : 'border-neutral-200 hover:border-primary-300 hover:shadow-md bg-white'
@@ -829,15 +853,15 @@ export default function GigDetail() {
                           </div>
                         )}
                         <div className="flex justify-between items-start mb-3">
-                          <h3 className="text-lg font-bold text-neutral-900">{pkg.name}</h3>
+                          <h3 className="text-base sm:text-lg font-bold text-neutral-900">{pkg.name}</h3>
                           <div className="text-right">
-                            <div className="text-2xl font-bold text-primary-600">
+                            <div className="text-xl sm:text-2xl font-bold text-primary-600">
                               PKR {pkg.price.toLocaleString()}
                             </div>
                           </div>
                         </div>
-                        <p className="text-sm text-neutral-600 mb-4 line-clamp-2">{pkg.description}</p>
-                        <div className="flex items-center justify-between text-sm text-neutral-700 mb-4 pb-4 border-b border-neutral-200">
+                        <p className="text-xs sm:text-sm text-neutral-600 mb-3 sm:mb-4 line-clamp-2">{pkg.description}</p>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 text-xs sm:text-sm text-neutral-700 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-neutral-200">
                           <div className="flex items-center gap-2">
                             <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -853,7 +877,7 @@ export default function GigDetail() {
                         </div>
                         <Button
                           fullWidth
-                          className="font-semibold py-3"
+                          className="font-semibold py-2 sm:py-3 text-sm sm:text-base"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleOrder(pkg)
@@ -884,9 +908,9 @@ export default function GigDetail() {
             </Card>
 
             {/* Additional Info Card */}
-            <Card>
-              <h3 className="font-semibold mb-4 text-neutral-900">Gig Information</h3>
-              <div className="space-y-3 text-sm">
+            <Card className="p-4 sm:p-6">
+              <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base text-neutral-900">Gig Information</h3>
+              <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
                 <div className="flex items-center justify-between py-2 border-b border-neutral-100">
                   <span className="text-neutral-600">Category</span>
                   <span className="font-medium text-neutral-900 capitalize">
@@ -922,18 +946,18 @@ export default function GigDetail() {
       
       {/* Order Confirmation Modal */}
       {showOrderModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <Card className="max-w-md w-full transform transition-all animate-in fade-in zoom-in-95">
-            <div className="p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6">
+          <Card className="max-w-md w-full transform transition-all animate-in fade-in zoom-in-95 mx-4">
+            <div className="p-4 sm:p-6">
               <div className="flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mx-auto mb-4">
                 <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-center mb-2 text-neutral-900">Confirm Your Order</h2>
-              <p className="text-center text-neutral-600 mb-6">Please review your order details</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-center mb-2 text-neutral-900">Confirm Your Order</h2>
+              <p className="text-center text-sm sm:text-base text-neutral-600 mb-4 sm:mb-6">Please review your order details</p>
               
-              <div className="bg-neutral-50 rounded-lg p-4 mb-6 space-y-3">
+              <div className="bg-neutral-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 space-y-2 sm:space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-neutral-600">Package:</span>
                   <span className="font-semibold text-neutral-900">{selectedPackage?.name}</span>
@@ -952,19 +976,19 @@ export default function GigDetail() {
                 )}
               </div>
               
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Button 
                   variant="secondary" 
                   fullWidth
                   onClick={() => setShowOrderModal(false)}
-                  className="py-3"
+                  className="py-2.5 sm:py-3 text-sm sm:text-base"
                 >
                   Cancel
                 </Button>
                 <Button 
                   fullWidth
                   onClick={handleConfirmOrder}
-                  className="py-3 font-semibold"
+                  className="py-2.5 sm:py-3 text-sm sm:text-base font-semibold"
                 >
                   Proceed to Payment
                 </Button>

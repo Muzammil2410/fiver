@@ -17,10 +17,10 @@ api.interceptors.request.use(
     if (config.headers.Authorization) {
       return config
     }
-    
+
     // Check if this is an admin route
     const isAdminRoute = config.url?.includes('/admin/')
-    
+
     if (isAdminRoute) {
       // For admin routes, use admin-token from localStorage
       const adminToken = localStorage.getItem('admin-token')
@@ -35,7 +35,7 @@ api.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`
       }
     }
-    
+
     return config
   },
   (error) => {
@@ -49,7 +49,7 @@ api.interceptors.response.use(
   (error) => {
     // Check if this is an admin route
     const isAdminRoute = error.config?.url?.includes('/admin/')
-    
+
     if (error.response?.status === 401) {
       if (isAdminRoute) {
         // For admin routes, clear admin session and redirect to admin login
@@ -61,10 +61,10 @@ api.interceptors.response.use(
         // For regular routes, clear auth state and redirect
         const { user } = useAuthStore.getState()
         const userRole = user?.role
-        
+
         // Clear auth state on 401
         useAuthStore.getState().logout()
-        
+
         // Redirect based on user role
         if (userRole === 'client') {
           window.location.href = '/client-login'

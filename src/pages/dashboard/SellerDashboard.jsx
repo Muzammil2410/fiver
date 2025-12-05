@@ -184,62 +184,62 @@ export default function SellerDashboard() {
       </div>
       
       {/* Summary Cards - Beautiful Design with Real-time Updates */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <Card className="bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-2 border-blue-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-blue-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
+        <Card className="bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-2 border-blue-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden p-4 sm:p-6">
+          <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-blue-400/20 rounded-full -mr-8 -mt-8 sm:-mr-10 sm:-mt-10 blur-xl"></div>
           <div className="relative">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-blue-800 uppercase tracking-wide">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <h3 className="text-xs sm:text-sm font-bold text-blue-800 uppercase tracking-wide">
                 Active Orders
               </h3>
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
             </div>
-            <p className="text-4xl sm:text-5xl font-extrabold text-blue-900 mb-1 transition-all duration-300">
+            <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-blue-900 mb-1 transition-all duration-300">
               {stats.activeOrders}
             </p>
-            <p className="text-xs font-medium text-blue-700 mt-2">Orders in progress</p>
+            <p className="text-xs font-medium text-blue-700 mt-1 sm:mt-2">Orders in progress</p>
           </div>
         </Card>
         
-        <Card className="bg-gradient-to-br from-green-50 via-green-100 to-green-200 border-2 border-green-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-green-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
+        <Card className="bg-gradient-to-br from-green-50 via-green-100 to-green-200 border-2 border-green-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden p-4 sm:p-6">
+          <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-green-400/20 rounded-full -mr-8 -mt-8 sm:-mr-10 sm:-mt-10 blur-xl"></div>
           <div className="relative">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-green-800 uppercase tracking-wide">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <h3 className="text-xs sm:text-sm font-bold text-green-800 uppercase tracking-wide">
                 Completed Orders
               </h3>
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
-            <p className="text-4xl sm:text-5xl font-extrabold text-green-900 mb-1 transition-all duration-300">
+            <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-green-900 mb-1 transition-all duration-300">
               {stats.completedOrders}
             </p>
-            <p className="text-xs font-medium text-green-700 mt-2">Successfully delivered</p>
+            <p className="text-xs font-medium text-green-700 mt-1 sm:mt-2">Successfully delivered</p>
           </div>
         </Card>
         
         <Link to="/withdrawal-requests" className="group">
-          <Card className="bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-2 border-orange-300 hover:border-orange-400 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden cursor-pointer">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-orange-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
+          <Card className="bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-2 border-orange-300 hover:border-orange-400 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden cursor-pointer p-4 sm:p-6">
+            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-orange-400/20 rounded-full -mr-8 -mt-8 sm:-mr-10 sm:-mt-10 blur-xl"></div>
             <div className="relative">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-orange-800 uppercase tracking-wide">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <h3 className="text-xs sm:text-sm font-bold text-orange-800 uppercase tracking-wide">
                   Request Withdrawal
                 </h3>
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
-              <p className="text-base sm:text-lg font-bold text-orange-900 transition-all duration-300 mb-2">
+              <p className="text-sm sm:text-base md:text-lg font-bold text-orange-900 transition-all duration-300 mb-1 sm:mb-2">
                 Click to Request
               </p>
               <p className="text-xs font-medium text-orange-700">Request withdrawal for completed orders</p>
@@ -247,28 +247,28 @@ export default function SellerDashboard() {
           </Card>
         </Link>
         
-        <Card className="bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200 border-2 border-yellow-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-400/20 rounded-full -mr-10 -mt-10 blur-xl"></div>
+        <Card className="bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200 border-2 border-yellow-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden p-4 sm:p-6">
+          <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-yellow-400/20 rounded-full -mr-8 -mt-8 sm:-mr-10 sm:-mt-10 blur-xl"></div>
           <div className="relative">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-yellow-800 uppercase tracking-wide">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <h3 className="text-xs sm:text-sm font-bold text-yellow-800 uppercase tracking-wide">
                 Average Rating
               </h3>
-              <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
               </div>
             </div>
-            <div className="flex items-baseline gap-2 mb-1">
-              <p className="text-4xl sm:text-5xl font-extrabold text-yellow-900 transition-all duration-300">
+            <div className="flex items-baseline gap-1 sm:gap-2 mb-1">
+              <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-yellow-900 transition-all duration-300">
                 {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : '0.0'}
               </p>
               <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
                   <svg
                     key={i}
-                    className={`w-4 h-4 ${
+                    className={`w-3 h-3 sm:w-4 sm:h-4 ${
                       i < Math.round(stats.averageRating)
                         ? 'text-yellow-500 fill-current'
                         : 'text-yellow-300'
@@ -281,7 +281,7 @@ export default function SellerDashboard() {
                 ))}
               </div>
             </div>
-            <p className="text-xs font-medium text-yellow-700 mt-2">Out of 5.0 stars</p>
+            <p className="text-xs font-medium text-yellow-700 mt-1 sm:mt-2">Out of 5.0 stars</p>
           </div>
         </Card>
       </div>

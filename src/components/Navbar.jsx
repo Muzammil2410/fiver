@@ -210,9 +210,9 @@ export default function Navbar() {
                       
                       {/* Notification Dropdown */}
                       {notificationMenuOpen && (
-                        <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-lg shadow-xl border border-neutral-200 z-50 max-h-96 overflow-hidden flex flex-col">
-                          <div className="p-4 border-b border-neutral-200 flex items-center justify-between">
-                            <h3 className="font-semibold text-neutral-900">Notifications</h3>
+                        <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-72 md:w-80 max-w-sm bg-white rounded-lg shadow-xl border border-neutral-200 z-50 max-h-96 overflow-hidden flex flex-col">
+                          <div className="p-3 sm:p-4 border-b border-neutral-200 flex items-center justify-between">
+                            <h3 className="font-semibold text-sm sm:text-base text-neutral-900">Notifications</h3>
                             {unreadCount > 0 && (
                               <span className="text-xs text-neutral-500">{unreadCount} unread</span>
                             )}
@@ -294,7 +294,7 @@ export default function Navbar() {
                   </button>
                   
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                    <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-md shadow-lg py-1 z-50">
                       {/* Only show seller menu items for freelancers */}
                       {user?.role === 'freelancer' && (
                         <>

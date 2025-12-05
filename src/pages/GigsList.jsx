@@ -11,6 +11,7 @@ import { toast } from '../utils/toast'
 export default function GigsList() {
   const user = useAuthStore((state) => state.user)
   const isSeller = user?.role === 'freelancer'
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const [searchParams] = useSearchParams()
   const location = useLocation()
   const [gigs, setGigs] = useState([])
@@ -90,9 +91,9 @@ export default function GigsList() {
     try {
       let response = null
       
-      // For sellers on /seller-gigs route: Get only their own gigs
-      // For clients on /gigs route: Get all gigs
-      // For sellers on /gigs route: Get all gigs (browse mode)
+      // For sellers on /seller-gigs route: Get only their own gigs (requires auth)
+      // For clients on /gigs route: Get all gigs (no auth required)
+      // For sellers on /gigs route: Get all gigs (browse mode, no auth required)
       if (isSeller && isSellerGigsRoute) {
         // Get user ID - handle both _id (MongoDB) and id formats
         const userId = user?._id || user?.id

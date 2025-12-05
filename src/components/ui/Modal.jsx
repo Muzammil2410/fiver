@@ -86,28 +86,28 @@ export default function Modal({
         </span>
         <div
           ref={modalRef}
-          className={`inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle ${sizeClasses[size]} w-full`}
+          className={`inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle ${sizeClasses[size]} w-full max-w-[calc(100vw-2rem)]`}
           {...props}
         >
           {title && (
-            <div className="px-6 py-4 border-b border-neutral-200">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-neutral-200">
               <h3
                 id="modal-title"
-                className="text-lg font-semibold text-neutral-900"
+                className="text-base sm:text-lg font-semibold text-neutral-900"
               >
                 {title}
               </h3>
             </div>
           )}
-          <div className="px-6 py-4">{children}</div>
+          <div className="px-4 sm:px-6 py-4 sm:py-6">{children}</div>
           {footer && (
-            <div className="px-6 py-4 border-t border-neutral-200 flex justify-end gap-2">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-neutral-200 flex flex-col sm:flex-row justify-end gap-2">
               {footer}
             </div>
           )}
           {!footer && onClose && (
-            <div className="px-6 py-4 border-t border-neutral-200 flex justify-end">
-              <Button variant="secondary" onClick={onClose}>
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-neutral-200 flex justify-end">
+              <Button variant="secondary" onClick={onClose} className="w-full sm:w-auto">
                 Close
               </Button>
             </div>

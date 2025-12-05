@@ -20,10 +20,15 @@ export default function ReviewList({ gigId }) {
   const fetchReviews = async () => {
     try {
       const response = await reviewService.getReviewsByGigId(gigId)
-      setReviews(response.data.reviews || [])
-      setAverageRating(response.data.averageRating || 0)
+      // Handle response structure: response.data or response
+      const reviewsData = response?.data || response
+      setReviews(reviewsData?.reviews || [])
+      setAverageRating(reviewsData?.averageRating || 0)
     } catch (error) {
       console.error('Error fetching reviews:', error)
+      // Set empty state on error
+      setReviews([])
+      setAverageRating(0)
     }
   }
   
@@ -62,8 +67,10 @@ export default function ReviewList({ gigId }) {
         </div>
       ) : (
         <div className="space-y-6">
-          {reviews.map((review) => (
-            <div key={review.id} className="border-b border-neutral-200 pb-6 last:border-b-0">
+          {reviews.map((review) => {
+            const reviewId = review._id || review.id
+            return (
+            <div key={reviewId} className="border-b border-neutral-200 pb-6 last:border-b-0">
               <div className="flex gap-4">
                 <Avatar
                   src={review.reviewerAvatar}
@@ -100,7 +107,8 @@ export default function ReviewList({ gigId }) {
                 </div>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </Card>
