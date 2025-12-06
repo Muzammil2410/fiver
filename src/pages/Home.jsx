@@ -22,8 +22,8 @@ export default function Home() {
         setLoadingGigs(true)
         const response = await gigService.getAllGigs({ page: 1, sort: 'newest' })
         const gigs = response?.data?.gigs || response?.gigs || []
-        // Show first 8 gigs on landing page (4 per row on large screens)
-        setFeaturedGigs(gigs.slice(0, 8))
+        // Show first 6 gigs on landing page (3 per row on large screens)
+        setFeaturedGigs(gigs.slice(0, 6))
       } catch (error) {
         console.error('Error fetching featured gigs:', error)
         setFeaturedGigs([])
@@ -566,14 +566,14 @@ export default function Home() {
             </div>
             
             {loadingGigs ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-                {[...Array(8)].map((_, i) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+                {[...Array(6)].map((_, i) => (
                   <Skeleton key={i} variant="rectangular" height="400px" />
                 ))}
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-8">
                   {featuredGigs.map((gig) => {
                     const gigId = gig._id || gig.id
                     return gigId ? <GigCard key={gigId} gig={gig} /> : null
