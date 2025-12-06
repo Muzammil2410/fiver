@@ -339,7 +339,7 @@ export default function GigsList() {
       {/* Show gigs if we have them, regardless of loading state */}
       {gigs.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             {validGigs.map((gig) => {
               const gigId = gig._id || gig.id
               return <GigCard key={gigId} gig={gig} />
