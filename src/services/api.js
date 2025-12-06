@@ -3,7 +3,7 @@ import { useAuthStore } from '../store/useAuthStore'
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://freelancer-services-platform-backend.onrender.com/api',
+  baseURL: 'http://localhost:5000/api' || 'https://freelancer-services-platform-backend.onrender.com/api',
   timeout: 30000, // 30 seconds timeout for API calls
   headers: {
     'Content-Type': 'application/json',

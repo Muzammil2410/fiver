@@ -40,6 +40,7 @@ import PaymentDetails from './pages/PaymentDetails'
 import ProfileSettings from './pages/ProfileSettings'
 import SellerProfile from './pages/seller/SellerProfile'
 import WithdrawalRequests from './pages/WithdrawalRequests'
+import JoinPage from './pages/JoinPage'
 
 function AppContent() {
   const location = useLocation()
@@ -86,6 +87,7 @@ function AppContent() {
           <Route path="/client-login" element={<ClientLogin />} />
           <Route path="/seller-signup" element={<SellerSignup />} />
           <Route path="/client-signup" element={<ClientSignup />} />
+          <Route path="/join" element={<JoinPage />} />
           
           {/* Client Browse Gigs - Shows ALL gigs from ALL sellers (no login required) */}
           <Route path="/gigs" element={<GigsList />} />

@@ -8,8 +8,8 @@ export default function Card({
   onClick,
   ...props
 }) {
-  const baseClasses = 'bg-white rounded-lg shadow-md overflow-hidden'
-  const clickableClasses = onClick ? 'cursor-pointer hover:shadow-lg transition-shadow' : ''
+  const baseClasses = 'bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden'
+  const clickableClasses = onClick ? 'cursor-pointer hover:shadow-xl hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-0.5' : ''
   
   return (
     <div

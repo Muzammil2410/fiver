@@ -21,6 +21,8 @@ export default function AdminDashboard() {
   const [orderHistoryLoading, setOrderHistoryLoading] = useState(false)
   const [clients, setClients] = useState([])
   const [clientsLoading, setClientsLoading] = useState(false)
+  const [sellers, setSellers] = useState([])
+  const [sellersLoading, setSellersLoading] = useState(false)
   const [withdrawalRequests, setWithdrawalRequests] = useState([])
   const [withdrawalRequestsLoading, setWithdrawalRequestsLoading] = useState(false)
   const [processingWithdrawalId, setProcessingWithdrawalId] = useState(null)
@@ -294,6 +296,43 @@ export default function AdminDashboard() {
       return () => clearInterval(interval)
     }
   }, [activeSection, fetchClients])
+
+  const fetchSellers = useCallback(async () => {
+    setSellersLoading(true)
+    try {
+      const adminToken = localStorage.getItem('admin-token')
+      if (!adminToken) {
+        navigate('/admin/login')
+        return
+      }
+      
+      const response = await api.get('/admin/sellers')
+      if (response.data.success) {
+        setSellers(response.data.data.sellers || [])
+      }
+    } catch (error) {
+      console.error('Error fetching sellers:', error)
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem('admin-token')
+        localStorage.removeItem('admin-user')
+        navigate('/admin/login')
+        toast.error('Session expired. Please login again.')
+      } else {
+        toast.error('Failed to fetch sellers')
+      }
+    } finally {
+      setSellersLoading(false)
+    }
+  }, [navigate])
+
+  useEffect(() => {
+    if (activeSection === 'sellers') {
+      fetchSellers()
+      // Refresh every 30 seconds when on sellers section
+      const interval = setInterval(fetchSellers, 30000)
+      return () => clearInterval(interval)
+    }
+  }, [activeSection, fetchSellers])
 
   const handleVerifyPayment = async (orderId, verified) => {
     setVerifyingOrderId(orderId)
@@ -683,86 +722,61 @@ export default function AdminDashboard() {
                     </div>
                   </Card>
 
-                  <Card className="shadow-lg overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full min-w-[640px]">
-                        <thead className="bg-gradient-to-r from-neutral-50 to-neutral-100 border-b-2 border-neutral-200">
-                          <tr>
-                            <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-bold text-neutral-700 uppercase tracking-wider">
-                              Name
-                            </th>
-                            <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-bold text-neutral-700 uppercase tracking-wider">
-                              Email
-                            </th>
-                            <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-bold text-neutral-700 uppercase tracking-wider">
-                              Phone
-                            </th>
-                            <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-bold text-neutral-700 uppercase tracking-wider">
-                              Registered
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-neutral-100">
-                          {clients.map((client, index) => {
-                            const clientId = client._id || client.id
-                            const formatDate = (date) => {
-                              if (!date) return 'N/A'
-                              return new Date(date).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                              })
-                            }
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    {clients.map((client, index) => {
+                      const clientId = client._id || client.id
+                      const formatDate = (date) => {
+                        if (!date) return 'N/A'
+                        return new Date(date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })
+                      }
 
-                            return (
-                              <tr 
-                                key={clientId} 
-                                className={`hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-150 ${
-                                  index % 2 === 0 ? 'bg-white' : 'bg-neutral-50/50'
-                                }`}
-                              >
-                                <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                  <div className="flex items-center">
-                                    {client.avatar ? (
-                                      <img
-                                        src={client.avatar}
-                                        alt={client.name}
-                                        className="h-10 w-10 sm:h-12 sm:w-12 rounded-full mr-3 border-2 border-neutral-200 shadow-sm"
-                                      />
-                                    ) : (
-                                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center mr-3 shadow-md">
-                                        <span className="text-white font-bold text-sm sm:text-base">
-                                          {client.name?.charAt(0)?.toUpperCase() || 'C'}
-                                        </span>
-                                      </div>
-                                    )}
-                                    <div className="text-sm sm:text-base font-semibold text-neutral-900">
-                                      {client.name || 'N/A'}
-                                    </div>
+                      return (
+                        <Card key={clientId} className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-blue-500">
+                          <div className="p-5 sm:p-6">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4 mb-4">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 mb-2">
+                                  {client.name || 'Unknown Client'}
+                                </h3>
+                                <p className="text-sm sm:text-base text-neutral-600 mb-1">
+                                  {client.email || 'N/A'}
+                                </p>
+                                {client.phone && (
+                                  <p className="text-sm text-neutral-600">
+                                    Phone: {client.phone}
+                                  </p>
+                                )}
+                                {client.createdAt && (
+                                  <p className="text-xs text-neutral-500 mt-2">
+                                    Registered: {formatDate(client.createdAt)}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex-shrink-0">
+                                {client.avatar ? (
+                                  <img
+                                    src={client.avatar}
+                                    alt={client.name}
+                                    className="h-16 w-16 sm:h-20 sm:w-20 rounded-full border-2 border-neutral-200 shadow-sm"
+                                  />
+                                ) : (
+                                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-md">
+                                    <span className="text-white font-bold text-xl sm:text-2xl">
+                                      {client.name?.charAt(0)?.toUpperCase() || 'C'}
+                                    </span>
                                   </div>
-                                </td>
-                                <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm sm:text-base text-neutral-900 font-medium">
-                                    {client.email || 'N/A'}
-                                  </div>
-                                </td>
-                                <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm sm:text-base text-neutral-600">
-                                    {client.phone || 'N/A'}
-                                  </div>
-                                </td>
-                                <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm sm:text-base text-neutral-600">
-                                    {formatDate(client.createdAt)}
-                                  </div>
-                                </td>
-                              </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </Card>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      )
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -770,29 +784,148 @@ export default function AdminDashboard() {
 
           {activeSection === 'sellers' && (
             <div className="space-y-4 sm:space-y-6">
-              <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
-                  Sellers
-                </h1>
-                <p className="text-xs sm:text-sm text-neutral-500 mt-1">
-                  View all registered sellers
-                </p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+                    Sellers
+                  </h1>
+                  <p className="text-xs sm:text-sm text-neutral-500 mt-1">
+                    View all registered sellers
+                  </p>
+                </div>
+                <Button
+                  onClick={fetchSellers}
+                  disabled={sellersLoading}
+                  variant="secondary"
+                  className="w-full sm:w-auto"
+                >
+                  {sellersLoading ? 'Refreshing...' : '🔄 Refresh'}
+                </Button>
               </div>
-              <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500">
-                <div className="p-8 sm:p-12">
-                  <div className="flex items-center justify-center py-8">
-                    <div className="text-center">
-                      <div className="text-6xl mb-4">💼</div>
-                      <p className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
-                        {stats?.totalSellers || 0}
-                      </p>
-                      <p className="text-base sm:text-lg text-neutral-600 font-medium">
-                        Total Sellers Registered
-                      </p>
+
+              {sellersLoading && sellers.length === 0 ? (
+                <Card className="shadow-lg">
+                  <div className="p-8 sm:p-12">
+                    <div className="flex items-center justify-center py-8">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                        <p className="text-neutral-600 font-medium">Loading sellers...</p>
+                      </div>
                     </div>
                   </div>
+                </Card>
+              ) : !sellersLoading && sellers.length === 0 ? (
+                <Card className="shadow-lg">
+                  <div className="p-8 sm:p-12">
+                    <div className="flex items-center justify-center py-8">
+                      <div className="text-center">
+                        <div className="text-6xl mb-4">💼</div>
+                        <p className="text-lg sm:text-xl font-semibold text-neutral-700 mb-2">
+                          No sellers found
+                        </p>
+                        <p className="text-sm text-neutral-500">
+                          Sellers will appear here once they register
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ) : (
+                <div className="space-y-4 sm:space-y-6">
+                  <Card className="shadow-lg bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-l-green-500">
+                    <div className="p-4 sm:p-5">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm sm:text-base font-semibold text-neutral-900">
+                            Total Sellers
+                          </p>
+                          <p className="text-xs text-neutral-600 mt-1">
+                            All registered sellers in the system
+                          </p>
+                        </div>
+                        <div className="px-4 py-2 bg-white rounded-lg shadow-sm">
+                          <p className="text-2xl sm:text-3xl font-bold text-green-600">
+                            {sellers.length}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    {sellers.map((seller, index) => {
+                      const sellerId = seller._id || seller.id
+                      const formatDate = (date) => {
+                        if (!date) return 'N/A'
+                        return new Date(date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })
+                      }
+
+                      return (
+                        <Card key={sellerId} className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500">
+                          <div className="p-5 sm:p-6">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4 mb-4">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-900 mb-2">
+                                  {seller.name || 'Unknown Seller'}
+                                </h3>
+                                <p className="text-sm sm:text-base text-neutral-600 mb-1">
+                                  {seller.email || 'N/A'}
+                                </p>
+                                {seller.title && (
+                                  <p className="text-sm text-neutral-500 mb-2 italic">
+                                    {seller.title}
+                                  </p>
+                                )}
+                                {seller.skills && seller.skills.length > 0 && (
+                                  <div className="mt-3">
+                                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+                                      Skills
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                      {seller.skills.map((skill, skillIndex) => (
+                                        <span
+                                          key={skillIndex}
+                                          className="inline-block px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-medium"
+                                        >
+                                          {skill}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {seller.createdAt && (
+                                  <p className="text-xs text-neutral-500 mt-3">
+                                    Registered: {formatDate(seller.createdAt)}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex-shrink-0">
+                                {seller.avatar ? (
+                                  <img
+                                    src={seller.avatar}
+                                    alt={seller.name}
+                                    className="h-16 w-16 sm:h-20 sm:w-20 rounded-full border-2 border-neutral-200 shadow-sm"
+                                  />
+                                ) : (
+                                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-md">
+                                    <span className="text-white font-bold text-xl sm:text-2xl">
+                                      {seller.name?.charAt(0)?.toUpperCase() || 'S'}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      )
+                    })}
+                  </div>
                 </div>
-              </Card>
+              )}
             </div>
           )}
 

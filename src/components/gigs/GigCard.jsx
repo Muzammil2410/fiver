@@ -100,7 +100,7 @@ function GigCard({ gig }) {
   
   return (
     <div
-      className="bg-white rounded-lg overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 border border-neutral-200"
+      className="bg-white rounded-xl overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 border border-neutral-200 hover:border-primary-300 transform hover:-translate-y-1"
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -166,7 +166,7 @@ function GigCard({ gig }) {
       </div>
       
       {/* Content */}
-      <div className="p-6">
+      <div className="p-4 sm:p-5 md:p-6">
         {/* Seller Info */}
         <div className="flex items-center gap-3 mb-4">
           <Avatar

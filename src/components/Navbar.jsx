@@ -5,7 +5,9 @@ import { useNotificationStore } from '../store/useNotificationStore'
 import Avatar from './ui/Avatar'
 import Badge from './ui/Badge'
 import Button from './ui/Button'
+import { toast } from '../utils/toast'
 import * as orderService from '../services/orders'
+import * as authService from '../services/auth'
 
 export default function Navbar() {
   const navigate = useNavigate()
@@ -18,6 +20,7 @@ export default function Navbar() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
+  const login = useAuthStore((state) => state.login)
   const unreadCount = useNotificationStore((state) => state.unreadCount)
   const notifications = useNotificationStore((state) => state.notifications)
   const markAsRead = useNotificationStore((state) => state.markAsRead)
@@ -34,6 +37,43 @@ export default function Navbar() {
       navigate('/seller-login')
     } else {
       navigate('/')
+    }
+  }
+
+  const handleSwitchToSeller = async () => {
+    try {
+      setUserMenuOpen(false)
+      
+      const response = await authService.switchToSeller()
+      
+      if (response && response.success && response.data) {
+        const { user: updatedUser, token } = response.data
+        
+        // Update user data in auth store
+        const userData = {
+          id: updatedUser._id || updatedUser.id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+          role: updatedUser.role,
+          username: updatedUser.username,
+          avatar: updatedUser.avatar,
+          otpEnabled: updatedUser.otpEnabled,
+          createdAt: updatedUser.createdAt,
+        }
+        
+        // Update the user in the store
+        login(userData, token)
+        
+        toast.success('Successfully switched to seller account!')
+        navigate('/dashboard')
+      } else {
+        toast.error(response?.message || 'Failed to switch to seller account')
+      }
+    } catch (error) {
+      console.error('Switch to seller error:', error)
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to switch to seller account'
+      toast.error(errorMessage)
     }
   }
   
@@ -173,7 +213,7 @@ export default function Navbar() {
                     Become a Seller
                   </Button>
                 </Link>
-                <Link to="/client-login">
+                <Link to="/join">
                   <Button>Join</Button>
                 </Link>
               </>
@@ -356,6 +396,13 @@ export default function Navbar() {
                           >
                             Profile Settings
                           </Link>
+                          <button
+                            type="button"
+                            onClick={handleSwitchToSeller}
+                            className="block w-full text-left px-4 py-2 text-sm text-primary-600 hover:bg-primary-50 font-medium"
+                          >
+                            Switch to Seller
+                          </button>
                         </>
                       )}
                       <hr className="my-1" />
@@ -485,7 +532,7 @@ export default function Navbar() {
                   Become a Seller
                 </Link>
                 <Link
-                  to="/client-login"
+                  to="/join"
                   className="block px-4 py-2 rounded-md text-neutral-700 hover:bg-neutral-100"
                   onClick={() => setMobileMenuOpen(false)}
                 >

@@ -182,12 +182,6 @@ export default function SellerLogin() {
                     Become a Seller
                   </Link>
                 </p>
-                <p className="text-sm text-neutral-500">
-                  Are you a client?{' '}
-                  <Link to="/client-login" className="text-primary-600 hover:text-primary-700 font-medium hover:underline">
-                    Client Login
-                  </Link>
-                </p>
               </div>
             </form>
           </div>

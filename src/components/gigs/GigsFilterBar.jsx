@@ -23,8 +23,8 @@ export default function GigsFilterBar() {
   }
   
   return (
-    <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+    <div className="bg-white rounded-xl shadow-lg border border-neutral-200 p-4 sm:p-5 md:p-6 mb-4 sm:mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
         {/* Mobile: Stack all filters vertically, Desktop: Grid layout */}
         {/* Category */}
         <div>
@@ -34,7 +34,7 @@ export default function GigsFilterBar() {
           <select
             value={category}
             onChange={(e) => updateParam('category', e.target.value)}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-2.5 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           >
             <option value="">All Categories</option>
             <option value="social-media-management">Social Media Management</option>
@@ -80,7 +80,7 @@ export default function GigsFilterBar() {
           <select
             value={deliveryTime}
             onChange={(e) => updateParam('deliveryTime', e.target.value)}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-2.5 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           >
             <option value="">Any</option>
             <option value="1">1 day</option>
@@ -99,7 +99,7 @@ export default function GigsFilterBar() {
           <select
             value={sort}
             onChange={(e) => updateParam('sort', e.target.value)}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-2.5 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           >
             <option value="best">Best Match</option>
             <option value="newest">Newest</option>

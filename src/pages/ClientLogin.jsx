@@ -93,8 +93,8 @@ export default function ClientLogin() {
   return (
     <MainLayout>
       <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-6 sm:py-8 px-4">
-        <Card className="w-full max-w-lg mx-auto shadow-xl">
-          <div className="p-6 sm:p-8 md:p-10">
+        <Card className="w-full max-w-2xl mx-auto shadow-2xl">
+          <div className="p-8 sm:p-10 md:p-12 lg:p-16">
             <div className="text-center mb-6 sm:mb-8">
               <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 rounded-full mb-3 sm:mb-4">
                 <svg
@@ -111,38 +111,40 @@ export default function ClientLogin() {
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3 text-neutral-900">Client Login</h1>
-              <p className="text-sm sm:text-base md:text-lg text-neutral-600">Sign in to browse and order amazing gigs</p>
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              <Input
-                label="Email or Phone"
-                name="email"
-                type="text"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                error={errors.email}
-                placeholder="Enter your email or phone number"
-                required
-                className="text-base"
-              />
+            <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6 md:space-y-7">
+              <div>
+                <Input
+                  label="Email or Phone"
+                  name="email"
+                  type="text"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  error={errors.email}
+                  placeholder="Enter your email or phone number"
+                  required
+                  className="text-base sm:text-lg"
+                />
+              </div>
               
-              <Input
-                label="Password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                error={errors.password}
-                placeholder="Enter your password"
-                required
-                className="text-base"
-              />
+              <div>
+                <Input
+                  label="Password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  error={errors.password}
+                  placeholder="Enter your password"
+                  required
+                  className="text-base sm:text-lg"
+                />
+              </div>
               
               {errors.submit && (
                 <div className="text-danger-600 text-sm bg-danger-50 p-3 rounded-md" role="alert">
@@ -155,9 +157,9 @@ export default function ClientLogin() {
                 fullWidth
                 loading={loading}
                 disabled={loading}
-                className="py-3 text-base font-semibold"
+                className="py-3.5 sm:py-4 text-base sm:text-lg font-semibold mt-6"
               >
-                Login as Client
+                Login
               </Button>
               
               <div className="text-center space-y-3 pt-4 border-t border-neutral-200">
@@ -165,12 +167,6 @@ export default function ClientLogin() {
                   Don't have an account?{' '}
                   <Link to="/client-signup" className="text-primary-600 hover:text-primary-700 font-semibold hover:underline">
                     Join Now
-                  </Link>
-                </p>
-                <p className="text-sm text-neutral-500">
-                  Are you a seller?{' '}
-                  <Link to="/seller-login" className="text-primary-600 hover:text-primary-700 font-medium hover:underline">
-                    Seller Login
                   </Link>
                 </p>
               </div>

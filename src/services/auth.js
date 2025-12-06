@@ -41,3 +41,18 @@ export const changePassword = async (passwordData) => {
   return response.data
 }
 
+// Switch to seller (convert client to freelancer)
+export const switchToSeller = async () => {
+  try {
+    console.log('Calling switch-to-seller endpoint...')
+    const response = await api.put('/auth/switch-to-seller', {})
+    console.log('Switch to seller response:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('Switch to seller API error:', error)
+    console.error('Error response:', error.response?.data)
+    console.error('Error status:', error.response?.status)
+    throw error
+  }
+}
+

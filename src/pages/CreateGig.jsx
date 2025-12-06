@@ -338,13 +338,13 @@ export default function CreateGig() {
             required
             options={[
               { value: '', label: 'Select category' },
-              { value: 'social-media-management', label: 'Social Media Management' },
-              { value: 'video-editing', label: 'Video Editing' },
-              { value: 'logo-designing', label: 'Logo Designing' },
-              { value: 'seo-expert', label: 'SEO Expert' },
-              { value: 'website-development', label: 'Website Development' },
-              { value: 'web-designer', label: 'Web Designer' },
-              { value: 'wordpress-developer', label: 'WordPress Developer' },
+              { value: 'digital-marketing', label: 'Digital Marketing' },
+              { value: 'video-animation', label: 'Video and Animation' },
+              { value: 'graphic-designing', label: 'Graphic Designing' },
+              { value: 'writing-translation', label: 'Writing and Translation' },
+              { value: 'ai-services', label: 'AI Services' },
+              { value: 'music-audio', label: 'Music and Audio' },
+              { value: 'arts-designing', label: 'Arts and Designing' },
             ]}
           />
           

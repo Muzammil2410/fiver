@@ -220,6 +220,13 @@ export default function GigDetail() {
       return
     }
     
+    // Check if user is the seller of this gig
+    const isSeller = gig.seller?.id === user.id || gig.sellerId === user.id || gig.seller?._id === user.id
+    if (isSeller) {
+      toast.error('You cannot place an order on your own gig')
+      return
+    }
+    
     setSelectedPackage(pkg)
     setShowOrderModal(true)
   }
@@ -233,6 +240,14 @@ export default function GigDetail() {
           message: 'Please login to place an order'
         }
       })
+      return
+    }
+    
+    // Double check if user is the seller of this gig
+    const isSeller = gig.seller?.id === user.id || gig.sellerId === user.id || gig.seller?._id === user.id
+    if (isSeller) {
+      toast.error('You cannot place an order on your own gig')
+      setShowOrderModal(false)
       return
     }
     
@@ -722,7 +737,7 @@ export default function GigDetail() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Seller Info Card */}
@@ -833,77 +848,96 @@ export default function GigDetail() {
               </div>
               
               <div className="p-4 sm:p-6">
-                {gig.packages && gig.packages.length > 0 ? (
-                  <div className="space-y-4">
-                    {gig.packages.map((pkg, idx) => (
-                      <div
-                        key={idx}
-                        className={`relative p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
-                          selectedPackage?.name === pkg.name
-                            ? 'border-primary-600 bg-primary-50 shadow-lg scale-[1.02]'
-                            : 'border-neutral-200 hover:border-primary-300 hover:shadow-md bg-white'
-                        }`}
-                        onClick={() => setSelectedPackage(pkg)}
-                      >
-                        {selectedPackage?.name === pkg.name && (
-                          <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                        )}
-                        <div className="flex justify-between items-start mb-3">
-                          <h3 className="text-base sm:text-lg font-bold text-neutral-900">{pkg.name}</h3>
-                          <div className="text-right">
-                            <div className="text-xl sm:text-2xl font-bold text-primary-600">
-                              PKR {pkg.price.toLocaleString()}
+                {(() => {
+                  const isSeller = user && (gig.seller?.id === user.id || gig.sellerId === user.id || gig.seller?._id === user.id)
+                  return gig.packages && gig.packages.length > 0 ? (
+                    <div className="space-y-4">
+                      {isSeller && (
+                        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <p className="text-sm text-yellow-800 text-center">
+                            You cannot place an order on your own gig
+                          </p>
+                        </div>
+                      )}
+                      {gig.packages.map((pkg, idx) => (
+                        <div
+                          key={idx}
+                          className={`relative p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
+                            selectedPackage?.name === pkg.name
+                              ? 'border-primary-600 bg-primary-50 shadow-lg scale-[1.02]'
+                              : 'border-neutral-200 hover:border-primary-300 hover:shadow-md bg-white'
+                          }`}
+                          onClick={() => !isSeller && setSelectedPackage(pkg)}
+                        >
+                          {selectedPackage?.name === pkg.name && (
+                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          )}
+                          <div className="flex justify-between items-start mb-3">
+                            <h3 className="text-base sm:text-lg font-bold text-neutral-900">{pkg.name}</h3>
+                            <div className="text-right">
+                              <div className="text-xl sm:text-2xl font-bold text-primary-600">
+                                PKR {pkg.price.toLocaleString()}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <p className="text-xs sm:text-sm text-neutral-600 mb-3 sm:mb-4 line-clamp-2">{pkg.description}</p>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 text-xs sm:text-sm text-neutral-700 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-neutral-200">
-                          <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>{pkg.deliveryTime} days</span>
+                          <p className="text-xs sm:text-sm text-neutral-600 mb-3 sm:mb-4 line-clamp-2">{pkg.description}</p>
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 text-xs sm:text-sm text-neutral-700 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-neutral-200">
+                            <div className="flex items-center gap-2">
+                              <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>{pkg.deliveryTime} days</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                              <span>{pkg.revisions} revisions</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            <span>{pkg.revisions} revisions</span>
-                          </div>
+                          <Button
+                            fullWidth
+                            disabled={isSeller}
+                            className="font-semibold py-2 sm:py-3 text-sm sm:text-base"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOrder(pkg)
+                            }}
+                          >
+                            Continue ({pkg.name})
+                          </Button>
                         </div>
-                        <Button
-                          fullWidth
-                          className="font-semibold py-2 sm:py-3 text-sm sm:text-base"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleOrder(pkg)
-                          }}
-                        >
-                          Continue ({pkg.name})
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-primary-600 mb-2">
-                      PKR {gig.price?.toLocaleString() || 'N/A'}
+                      ))}
                     </div>
-                    <p className="text-neutral-600 mb-6">Standard Package</p>
-                    <Button
-                      fullWidth
-                      size="lg"
-                      className="font-semibold py-3"
-                      onClick={() => handleOrder({ name: 'standard', price: gig.price })}
-                    >
-                      Order Now
-                    </Button>
-                  </div>
-                )}
+                  ) : (
+                    <div className="text-center">
+                      {isSeller && (
+                        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <p className="text-sm text-yellow-800">
+                            You cannot place an order on your own gig
+                          </p>
+                        </div>
+                      )}
+                      <div className="text-4xl font-bold text-primary-600 mb-2">
+                        PKR {gig.price?.toLocaleString() || 'N/A'}
+                      </div>
+                      <p className="text-neutral-600 mb-6">Standard Package</p>
+                      <Button
+                        fullWidth
+                        size="lg"
+                        disabled={isSeller}
+                        className="font-semibold py-3"
+                        onClick={() => handleOrder({ name: 'standard', price: gig.price })}
+                      >
+                        Order Now
+                      </Button>
+                    </div>
+                  )
+                })()}
               </div>
             </Card>
 

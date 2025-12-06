@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import MainLayout from '../layouts/MainLayout'
 import Button from '../components/ui/Button'
@@ -12,6 +12,8 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const [featuredGigs, setFeaturedGigs] = useState([])
   const [loadingGigs, setLoadingGigs] = useState(true)
+  const [categoryScrollPosition, setCategoryScrollPosition] = useState(0)
+  const [hoveredCardId, setHoveredCardId] = useState(null)
   
   useEffect(() => {
     // Fetch some featured gigs for the landing page
@@ -20,8 +22,8 @@ export default function Home() {
         setLoadingGigs(true)
         const response = await gigService.getAllGigs({ page: 1, sort: 'newest' })
         const gigs = response?.data?.gigs || response?.gigs || []
-        // Show first 6 gigs on landing page
-        setFeaturedGigs(gigs.slice(0, 6))
+        // Show first 8 gigs on landing page (4 per row on large screens)
+        setFeaturedGigs(gigs.slice(0, 8))
       } catch (error) {
         console.error('Error fetching featured gigs:', error)
         setFeaturedGigs([])
@@ -50,6 +52,216 @@ export default function Home() {
   ]
   
   const trustedBy = ['Meta', 'Google', 'Microsoft', 'Amazon', 'PayPal', 'Stripe']
+
+  const categoryCards = [
+    {
+      id: 'programming-tech',
+      name: 'Programming & Tech',
+      link: '/gigs?category=programming-tech',
+      bgClass: 'bg-white',
+      hoverBgClass: '',
+      borderClass: 'border-neutral-200',
+      icon: (
+        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <rect x="3" y="4" width="18" height="12" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M3 8h18" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="7" cy="16" r="1.5" fill="currentColor" />
+          <circle cx="12" cy="16" r="1.5" fill="currentColor" />
+          <circle cx="17" cy="16" r="1.5" fill="currentColor" />
+        </svg>
+      ),
+    },
+    {
+      id: 'graphics-design',
+      name: 'Graphics & Design',
+      link: '/gigs?category=graphics-design',
+      bgClass: 'bg-white',
+      hoverBgClass: 'hover:bg-purple-50',
+      borderClass: 'border-neutral-200 hover:border-purple-300',
+      icon: (
+        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <rect x="4" y="4" width="16" height="16" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="5" cy="5" r="0.8" fill="currentColor" />
+          <circle cx="19" cy="5" r="0.8" fill="currentColor" />
+          <circle cx="5" cy="19" r="0.8" fill="currentColor" />
+          <circle cx="19" cy="19" r="0.8" fill="currentColor" />
+          <path d="M12 7c-1.5 0-3 1.5-3 3s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3z" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M12 7l-2 2 2 2 2-2-2-2z" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
+    {
+      id: 'digital-marketing',
+      name: 'Digital Marketing',
+      link: '/gigs?category=digital-marketing',
+      bgClass: 'bg-white',
+      hoverBgClass: 'hover:bg-pink-50',
+      borderClass: 'border-neutral-200 hover:border-pink-300',
+      icon: (
+        <div className="relative w-full h-full">
+          <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <rect x="6" y="3" width="12" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M12 5v2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <svg className="absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
+        </div>
+      ),
+    },
+    {
+      id: 'writing-translation',
+      name: 'Writing & Translation',
+      link: '/gigs?category=writing-translation',
+      bgClass: 'bg-white',
+      hoverBgClass: 'hover:bg-blue-50',
+      borderClass: 'border-neutral-200 hover:border-blue-300',
+      icon: (
+        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <rect x="3" y="4" width="8" height="8" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="13" y="4" width="8" height="8" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+          <text x="6" y="9" fontSize="5" fill="currentColor" textAnchor="middle" fontFamily="serif" fontWeight="normal">文</text>
+          <text x="16" y="9" fontSize="5" fill="currentColor" textAnchor="middle" fontWeight="bold">A</text>
+        </svg>
+      ),
+    },
+    {
+      id: 'video-animation',
+      name: 'Video & Animation',
+      link: '/gigs?category=video-animation',
+      bgClass: 'bg-white',
+      hoverBgClass: 'hover:bg-red-50',
+      borderClass: 'border-neutral-200 hover:border-red-300',
+      icon: (
+        <div className="relative w-full h-full">
+          <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <rect x="3" y="4" width="8" height="8" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+            <rect x="13" y="4" width="8" height="8" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <svg className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </div>
+      ),
+    },
+    {
+      id: 'ai-services',
+      name: 'AI Services',
+      link: '/gigs?category=ai-services',
+      bgClass: 'bg-white',
+      hoverBgClass: 'hover:bg-indigo-50',
+      borderClass: 'border-neutral-200 hover:border-indigo-300',
+      icon: (
+        <div className="relative w-full h-full">
+          <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <rect x="3" y="3" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M6 7h12M6 11h12M6 15h8" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M8 5l-2 2 2 2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <svg className="absolute top-0 right-0 w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+          </svg>
+        </div>
+      ),
+    },
+    {
+      id: 'music-audio',
+      name: 'Music & Audio',
+      link: '/gigs?category=music-audio',
+      bgClass: 'bg-white',
+      hoverBgClass: 'hover:bg-yellow-50',
+      borderClass: 'border-neutral-200 hover:border-yellow-300',
+      icon: (
+        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <path d="M9 18V6l8-1v12" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M6 16a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M17 14a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M3 12h2M3 10h2M3 14h2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
+    {
+      id: 'business',
+      name: 'Business',
+      link: '/gigs?category=business',
+      bgClass: 'bg-white',
+      hoverBgClass: 'hover:bg-teal-50',
+      borderClass: 'border-neutral-200 hover:border-teal-300',
+      icon: (
+        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <circle cx="6" cy="7" r="2" fill="currentColor" />
+          <path d="M6 9v4" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="12" cy="7" r="2" fill="currentColor" />
+          <path d="M12 9v4" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="18" cy="7" r="2" fill="currentColor" />
+          <path d="M18 9v4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
+    {
+      id: 'consulting',
+      name: 'Consulting',
+      link: '/gigs?category=consulting',
+      bgClass: 'bg-white',
+      hoverBgClass: 'hover:bg-cyan-50',
+      borderClass: 'border-neutral-200 hover:border-cyan-300',
+      icon: (
+        <div className="relative w-full h-full">
+          <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <rect x="3" y="3" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="12" cy="9" r="2" fill="currentColor" />
+            <path d="M12 11v4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <svg className="absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      ),
+    },
+  ]
+
+  const categoryCardRef = useRef(null)
+  const [canScrollPrev, setCanScrollPrev] = useState(false)
+  const [canScrollNext, setCanScrollNext] = useState(true)
+
+  const checkScrollButtons = () => {
+    const container = categoryCardRef.current
+    if (!container) return
+
+    const { scrollLeft, scrollWidth, clientWidth } = container
+    setCanScrollPrev(scrollLeft > 0)
+    setCanScrollNext(scrollLeft < scrollWidth - clientWidth - 10)
+  }
+
+  const scrollCategories = (direction) => {
+    const container = categoryCardRef.current
+    if (!container) return
+
+    const cardWidth = 160 + 24 // Card width + gap
+    const scrollAmount = cardWidth * 3 // Scroll 3 cards at a time
+    const currentScroll = container.scrollLeft
+    const newScroll = direction === 'next' 
+      ? currentScroll + scrollAmount
+      : currentScroll - scrollAmount
+
+    container.scrollTo({
+      left: newScroll,
+      behavior: 'smooth'
+    })
+
+    // Update button states after scroll
+    setTimeout(checkScrollButtons, 300)
+  }
+
+  useEffect(() => {
+    checkScrollButtons()
+    const container = categoryCardRef.current
+    if (container) {
+      container.addEventListener('scroll', checkScrollButtons)
+      return () => container.removeEventListener('scroll', checkScrollButtons)
+    }
+  }, [])
   
   return (
     <MainLayout fullWidth>
@@ -160,6 +372,70 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Category Cards Section */}
+      <div className="bg-white py-8 sm:py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
+          {/* Navigation Buttons */}
+          {canScrollPrev && (
+            <button
+              onClick={() => scrollCategories('prev')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white shadow-lg border border-neutral-200 flex items-center justify-center transition-all duration-300 hover:bg-neutral-50 hover:shadow-xl hover:scale-110"
+              aria-label="Previous categories"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+
+          {canScrollNext && (
+            <button
+              onClick={() => scrollCategories('next')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white shadow-lg border border-neutral-200 flex items-center justify-center transition-all duration-300 hover:bg-neutral-50 hover:shadow-xl hover:scale-110"
+              aria-label="Next categories"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
+
+          {/* Category Cards Container */}
+          <div
+            ref={categoryCardRef}
+            className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto scroll-smooth px-12 sm:px-14 md:px-16 scrollbar-hide"
+            onScroll={checkScrollButtons}
+          >
+            {categoryCards.map((card) => {
+              const isHovered = hoveredCardId === card.id
+              const isDefaultGreen = hoveredCardId === null && card.id === 'programming-tech'
+              const hasGreenBg = isHovered || isDefaultGreen
+              
+              return (
+                <Link
+                  key={card.id}
+                  to={card.link}
+                  onMouseEnter={() => setHoveredCardId(card.id)}
+                  onMouseLeave={() => setHoveredCardId(null)}
+                  className={`group relative flex-shrink-0 w-[140px] sm:w-[150px] md:w-[160px] aspect-square rounded-xl sm:rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center hover:shadow-lg transition-all duration-300 transform hover:scale-105 border ${
+                    hasGreenBg
+                      ? 'bg-gradient-to-br from-green-100 to-green-200 border-green-200 hover:border-green-400'
+                      : `${card.bgClass} ${card.hoverBgClass || ''} ${card.borderClass}`
+                  }`}
+                >
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mb-2 sm:mb-3 flex items-center justify-center">
+                    {card.icon}
+                  </div>
+                  <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-neutral-900 text-center leading-tight">
+                    {card.name}
+                  </p>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -290,14 +566,14 @@ export default function Home() {
             </div>
             
             {loadingGigs ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+                {[...Array(8)].map((_, i) => (
                   <Skeleton key={i} variant="rectangular" height="400px" />
                 ))}
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mb-8">
                   {featuredGigs.map((gig) => {
                     const gigId = gig._id || gig.id
                     return gigId ? <GigCard key={gigId} gig={gig} /> : null
