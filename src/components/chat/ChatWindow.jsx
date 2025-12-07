@@ -17,7 +17,7 @@ export default function ChatWindow({ orderId }) {
     if (!orderId || !token) return
 
     // Initialize Socket.io connection
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://freelancer-services-platform-backend.onrender.com/api'
+    const API_BASE_URL = 'https://freelancer-services-platform-backend.onrender.com/api'
     const socket = io(API_BASE_URL, {
       auth: {
         token: token
