@@ -376,70 +376,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Category Cards Section */}
-      <div className="bg-white py-8 sm:py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
-          {/* Navigation Buttons */}
-          {canScrollPrev && (
-            <button
-              onClick={() => scrollCategories('prev')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white shadow-lg border border-neutral-200 flex items-center justify-center transition-all duration-300 hover:bg-neutral-50 hover:shadow-xl hover:scale-110"
-              aria-label="Previous categories"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-          )}
-
-          {canScrollNext && (
-            <button
-              onClick={() => scrollCategories('next')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white shadow-lg border border-neutral-200 flex items-center justify-center transition-all duration-300 hover:bg-neutral-50 hover:shadow-xl hover:scale-110"
-              aria-label="Next categories"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          )}
-
-          {/* Category Cards Container */}
-          <div
-            ref={categoryCardRef}
-            className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto scroll-smooth px-12 sm:px-14 md:px-16 scrollbar-hide"
-            onScroll={checkScrollButtons}
-          >
-            {categoryCards.map((card) => {
-              const isHovered = hoveredCardId === card.id
-              const isDefaultGreen = hoveredCardId === null && card.id === 'programming-tech'
-              const hasGreenBg = isHovered || isDefaultGreen
-              
-              return (
-                <Link
-                  key={card.id}
-                  to={card.link}
-                  onMouseEnter={() => setHoveredCardId(card.id)}
-                  onMouseLeave={() => setHoveredCardId(null)}
-                  className={`group relative flex-shrink-0 w-[140px] sm:w-[150px] md:w-[160px] aspect-square rounded-xl sm:rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center hover:shadow-lg transition-all duration-300 transform hover:scale-105 border ${
-                    hasGreenBg
-                      ? 'bg-gradient-to-br from-green-100 to-green-200 border-green-200 hover:border-green-400'
-                      : `${card.bgClass} ${card.hoverBgClass || ''} ${card.borderClass}`
-                  }`}
-                >
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mb-2 sm:mb-3 flex items-center justify-center">
-                    {card.icon}
-                  </div>
-                  <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-neutral-900 text-center leading-tight">
-                    {card.name}
-                  </p>
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-
           {/* Statistics Section */}
       <div className="bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-8 sm:py-12 md:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -591,6 +527,70 @@ export default function Home() {
                       </svg>
                     </Button>
                   </Link>
+                </div>
+
+                {/* Category Cards Section */}
+                <div className="bg-white py-8 sm:py-12 md:py-16 mt-8">
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
+                    {/* Navigation Buttons */}
+                    {canScrollPrev && (
+                      <button
+                        onClick={() => scrollCategories('prev')}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white shadow-lg border border-neutral-200 flex items-center justify-center transition-all duration-300 hover:bg-neutral-50 hover:shadow-xl hover:scale-110"
+                        aria-label="Previous categories"
+                      >
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                    )}
+
+                    {canScrollNext && (
+                      <button
+                        onClick={() => scrollCategories('next')}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white shadow-lg border border-neutral-200 flex items-center justify-center transition-all duration-300 hover:bg-neutral-50 hover:shadow-xl hover:scale-110"
+                        aria-label="Next categories"
+                      >
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    )}
+
+                    {/* Category Cards Container */}
+                    <div
+                      ref={categoryCardRef}
+                      className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto scroll-smooth px-12 sm:px-14 md:px-16 scrollbar-hide"
+                      onScroll={checkScrollButtons}
+                    >
+                      {categoryCards.map((card) => {
+                        const isHovered = hoveredCardId === card.id
+                        const isDefaultGreen = hoveredCardId === null && card.id === 'programming-tech'
+                        const hasGreenBg = isHovered || isDefaultGreen
+                        
+                        return (
+                          <Link
+                            key={card.id}
+                            to={card.link}
+                            onMouseEnter={() => setHoveredCardId(card.id)}
+                            onMouseLeave={() => setHoveredCardId(null)}
+                            className={`group relative flex-shrink-0 w-[140px] sm:w-[150px] md:w-[160px] aspect-square rounded-xl sm:rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center hover:shadow-lg transition-all duration-300 transform hover:scale-105 border ${
+                              hasGreenBg
+                                ? 'bg-gradient-to-br from-green-100 to-green-200 border-green-200 hover:border-green-400'
+                                : `${card.bgClass} ${card.hoverBgClass || ''} ${card.borderClass}`
+                            }`}
+                          >
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mb-2 sm:mb-3 flex items-center justify-center">
+                              {card.icon}
+                            </div>
+                            <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-neutral-900 text-center leading-tight">
+                              {card.name}
+                            </p>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </div>
                 </div>
               </>
             )}
