@@ -356,132 +356,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-      
-      {/* Trust Indicators */}
-      <div className="bg-white py-6 sm:py-8 border-t border-neutral-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-12">
-            <p className="text-sm sm:text-base text-neutral-600 font-medium">Trusted by:</p>
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8">
-              {trustedBy.map((company, idx) => (
-                <div
-                  key={idx}
-                  className="text-neutral-400 hover:text-neutral-600 font-semibold text-sm sm:text-base md:text-lg transition-colors cursor-pointer"
-                >
-                  {company}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-          {/* Statistics Section */}
-      <div className="bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-8 sm:py-12 md:py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent mb-2">
-                10K+
-              </div>
-              <div className="text-xs sm:text-sm md:text-base text-neutral-600 font-medium">
-                Active Freelancers
-              </div>
-            </div>
-            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-secondary-600 to-secondary-800 bg-clip-text text-transparent mb-2">
-                50K+
-              </div>
-              <div className="text-xs sm:text-sm md:text-base text-neutral-600 font-medium">
-                Completed Projects
-              </div>
-            </div>
-            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-success-600 to-success-800 bg-clip-text text-transparent mb-2">
-                98%
-              </div>
-              <div className="text-xs sm:text-sm md:text-base text-neutral-600 font-medium">
-                Client Satisfaction
-              </div>
-            </div>
-            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent mb-2">
-                24/7
-              </div>
-              <div className="text-xs sm:text-sm md:text-base text-neutral-600 font-medium">
-                Support Available
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* How It Works Section */}
-      <div className="bg-white py-12 sm:py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-3 sm:mb-4">
-              How It Works
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-neutral-600 max-w-2xl mx-auto">
-              Get started in three simple steps
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12">
-            <div className="relative text-center group">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg z-10 group-hover:scale-110 transition-transform duration-300">
-                1
-              </div>
-              <div className="pt-6 sm:pt-8 p-4 sm:p-6 bg-gradient-to-br from-primary-50 to-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-primary-200 transition-colors">
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-neutral-900 mb-2 sm:mb-3">Browse Services</h3>
-                <p className="text-sm sm:text-base text-neutral-600">
-                  Explore thousands of services from verified freelancers across various categories
-                </p>
-              </div>
-            </div>
-            
-            <div className="relative text-center group">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg z-10 group-hover:scale-110 transition-transform duration-300">
-                2
-              </div>
-              <div className="pt-6 sm:pt-8 p-4 sm:p-6 bg-gradient-to-br from-secondary-50 to-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-secondary-200 transition-colors">
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-neutral-900 mb-2 sm:mb-3">Choose & Order</h3>
-                <p className="text-sm sm:text-base text-neutral-600">
-                  Select the perfect package, place your order, and provide project requirements
-                </p>
-              </div>
-            </div>
-            
-            <div className="relative text-center group sm:col-span-2 md:col-span-1">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-success-500 to-success-600 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg z-10 group-hover:scale-110 transition-transform duration-300">
-                3
-              </div>
-              <div className="pt-6 sm:pt-8 p-4 sm:p-6 bg-gradient-to-br from-success-50 to-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-success-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-success-200 transition-colors">
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-neutral-900 mb-2 sm:mb-3">Get Results</h3>
-                <p className="text-sm sm:text-base text-neutral-600">
-                  Receive high-quality work on time and collaborate until you're completely satisfied
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Featured Gigs Section */}
       {featuredGigs.length > 0 && (
@@ -597,6 +471,113 @@ export default function Home() {
           </div>
         </div>
       )}
+      
+      {/* Statistics Section */}
+      <div className="bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-8 sm:py-12 md:py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent mb-2">
+                10K+
+              </div>
+              <div className="text-xs sm:text-sm md:text-base text-neutral-600 font-medium">
+                Active Freelancers
+              </div>
+            </div>
+            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-secondary-600 to-secondary-800 bg-clip-text text-transparent mb-2">
+                50K+
+              </div>
+              <div className="text-xs sm:text-sm md:text-base text-neutral-600 font-medium">
+                Completed Projects
+              </div>
+            </div>
+            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-success-600 to-success-800 bg-clip-text text-transparent mb-2">
+                98%
+              </div>
+              <div className="text-xs sm:text-sm md:text-base text-neutral-600 font-medium">
+                Client Satisfaction
+              </div>
+            </div>
+            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent mb-2">
+                24/7
+              </div>
+              <div className="text-xs sm:text-sm md:text-base text-neutral-600 font-medium">
+                Support Available
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* How It Works Section */}
+      <div className="bg-white py-12 sm:py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-3 sm:mb-4">
+              How It Works
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-neutral-600 max-w-2xl mx-auto">
+              Get started in three simple steps
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12">
+            <div className="relative text-center group">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg z-10 group-hover:scale-110 transition-transform duration-300">
+                1
+              </div>
+              <div className="pt-6 sm:pt-8 p-4 sm:p-6 bg-gradient-to-br from-primary-50 to-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-primary-200 transition-colors">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-neutral-900 mb-2 sm:mb-3">Browse Services</h3>
+                <p className="text-sm sm:text-base text-neutral-600">
+                  Explore thousands of services from verified freelancers across various categories
+                </p>
+              </div>
+            </div>
+            
+            <div className="relative text-center group">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg z-10 group-hover:scale-110 transition-transform duration-300">
+                2
+              </div>
+              <div className="pt-6 sm:pt-8 p-4 sm:p-6 bg-gradient-to-br from-secondary-50 to-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-secondary-200 transition-colors">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-neutral-900 mb-2 sm:mb-3">Choose & Order</h3>
+                <p className="text-sm sm:text-base text-neutral-600">
+                  Select the perfect package, place your order, and provide project requirements
+                </p>
+              </div>
+            </div>
+            
+            <div className="relative text-center group sm:col-span-2 md:col-span-1">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-success-500 to-success-600 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg z-10 group-hover:scale-110 transition-transform duration-300">
+                3
+              </div>
+              <div className="pt-6 sm:pt-8 p-4 sm:p-6 bg-gradient-to-br from-success-50 to-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-success-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-success-200 transition-colors">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-neutral-900 mb-2 sm:mb-3">Get Results</h3>
+                <p className="text-sm sm:text-base text-neutral-600">
+                  Receive high-quality work on time and collaborate until you're completely satisfied
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Features Section */}
       <div className="bg-gradient-to-br from-neutral-50 via-white to-primary-50 py-12 sm:py-16">
